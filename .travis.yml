@@ -1,7 +1,6 @@
 language: go
 go:
   - 1.12.x
-  - master
-script: go test -cover -configFile=appConfig.toml
+script: go test -test.bench=.* -coverprofile=coverage.txt -covermode=atomic
 after_success:
   - bash <(curl -s https://codecov.io/bash)
