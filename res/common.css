@@ -1,0 +1,19 @@
+@font-face {
+    font-family: 'UbuntuMono';url('../font/UbuntuMono-R.ttf')format('truetype');
+}
+
+@font-face {
+    font-family: 'UbuntuMono-Bord';url('../font/UbuntuMono-B.ttf')format('truetype');
+}
+
+@font-face {
+    font-family: 'UbuntuMono-Italic';url('../font/UbuntuMono-RI.ttf')format('truetype');
+}
+
+@font-face {
+    font-family: 'UbuntuMono-Bord-Italic';url('../font/UbuntuMono-BI.ttf')format('truetype');
+}
+
+body {
+    font-family: UbuntuMono, monospace;
+}

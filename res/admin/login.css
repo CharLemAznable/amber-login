@@ -1,0 +1,41 @@
+.login-content {
+    width: 280px;
+}
+
+.login-content.layui-form-pane {
+    margin: 10px;
+}
+
+.login-content.layui-form-pane .layui-form-label {
+    width: 90px;
+}
+
+.login-content.layui-form-pane .layui-input-block {
+    margin-left: 90px;
+}
+
+.login-content.layui-form-pane .layui-input-block.captcha-input-block {
+    padding-right: 85px;
+}
+
+.login-content.layui-form-pane .captcha-block {
+    height: 38px;
+    width: 80px;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.login-content.layui-form-pane .captcha-block img {
+    height: 100%;
+    width: 100%;
+}
+
+.login-content.layui-form-pane .login-btn {
+    width: 100%;
+}
+
+#login-content ~ .layui-layer-btn {
+    padding-top: 0;
+    padding-bottom: 0;
+}

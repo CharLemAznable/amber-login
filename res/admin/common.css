@@ -1,0 +1,54 @@
+.admin-header {
+    border-bottom: 1px solid #404553;
+    background-color: #393D49;
+}
+
+.admin-header .layui-nav {
+    padding: 0
+}
+
+.admin-main {
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.admin-footer {
+    margin-top: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    color: #666;
+    font-weight: 300;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #eee;
+    z-index: 9999;
+}
+
+.change-password-content {
+    width: 280px;
+}
+
+.change-password-content.layui-form-pane {
+    margin: 10px;
+}
+
+.change-password-content.layui-form-pane .layui-form-label {
+    width: 90px;
+}
+
+.change-password-content.layui-form-pane .layui-input-block {
+    margin-left: 90px;
+}
+
+.change-password-content.layui-form-pane .confirm-btn {
+    width: 100%;
+}
+
+#change-password-form ~ .layui-layer-btn {
+    padding-top: 0;
+    padding-bottom: 0
+}

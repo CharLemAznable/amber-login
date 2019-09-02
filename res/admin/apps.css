@@ -1,0 +1,59 @@
+.apps-container.admin-main {
+    text-align: left;
+    padding: 20px;
+    background-color: #eee;
+}
+
+.apps-container .layui-card {
+    height: 160px;
+}
+
+.apps-container .layui-card .app-attr {
+    display: inline-block;
+    width: 100px;
+}
+
+.apps-container .layui-card .app-name {
+    display: inline-block;
+}
+
+.apps-container .layui-card .app-action {
+    display: inline-block;
+    float: right;
+}
+
+.apps-container .layui-card-add {
+    text-align: center;
+    line-height: 160px;
+    cursor: pointer;
+}
+
+.apps-container .layui-card-add .layui-icon {
+    font-size: 60px;
+    color: #C1C1C1;
+}
+
+.app-content {
+    width: 330px;
+}
+
+.app-content.layui-form-pane {
+    margin: 10px;
+}
+
+.app-content.layui-form-pane .layui-form-label {
+    width: 120px;
+}
+
+.app-content.layui-form-pane .layui-input-block {
+    margin-left: 120px;
+}
+
+.app-content.layui-form-pane .app-submit-btn {
+    width: 100%;
+}
+
+#add-app-form ~ .layui-layer-btn {
+    padding-top: 0;
+    padding-bottom: 0
+}

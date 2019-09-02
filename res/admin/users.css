@@ -1,0 +1,66 @@
+.users-container.admin-main {
+    text-align: left;
+}
+
+.users-container.admin-main .layui-table-page .layui-laypage {
+    position: absolute;
+    right: 7px;
+}
+
+.users-container.admin-main .layui-table-view .layui-table {
+    width: 100%;
+}
+
+.privilege-content {
+    width: 480px;
+}
+
+.privilege-content.layui-form-pane {
+    margin: 10px;
+}
+
+.privilege-content.layui-form-pane .layui-transfer-active {
+    margin: 0 17px;
+}
+
+.privilege-content.layui-form-pane .layui-form-label {
+    width: 90px;
+}
+
+.privilege-content.layui-form-pane .layui-input-block {
+    margin-left: 90px;
+}
+
+.privilege-content.layui-form-pane .privilege-btn {
+    width: 100%;
+}
+
+#privilege-form ~ .layui-layer-btn {
+    padding-top: 0;
+    padding-bottom: 0
+}
+
+.reset-content {
+    width: 280px;
+}
+
+.reset-content.layui-form-pane {
+    margin: 10px;
+}
+
+.reset-content.layui-form-pane .layui-form-label {
+    width: 90px;
+}
+
+.reset-content.layui-form-pane .layui-input-block {
+    margin-left: 90px;
+}
+
+.reset-content.layui-form-pane .reset-btn {
+    width: 100%;
+}
+
+#reset-form ~ .layui-layer-btn {
+    padding-top: 0;
+    padding-bottom: 0
+}

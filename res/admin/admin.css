@@ -1,0 +1,28 @@
+.admin-title {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.admin-title legend {
+    font-size: 14px;
+}
+
+.admin-content {
+    width: 280px;
+}
+
+.admin-content.layui-form-pane {
+    margin: 10px auto;
+}
+
+.admin-content.layui-form-pane .layui-form-label {
+    width: 90px;
+}
+
+.admin-content.layui-form-pane .layui-input-block {
+    margin-left: 90px;
+}
+
+.admin-content.layui-form-pane .admin-submit-btn {
+    width: 100%;
+}

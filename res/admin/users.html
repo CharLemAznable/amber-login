@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>Amber管理后台</title>
+    <link rel="stylesheet" href="/res/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/res/common.css"/>
+    <link rel="stylesheet" href="/res/admin/common.css"/>
+    <link rel="stylesheet" href="/res/admin/users.css"/>
+</head>
+<body>
+
+<div class="layui-header admin-header">
+    <div class="layui-container">
+        <ul class="layui-nav">
+            <li class="layui-nav-item"><a href="${contextPath}/admin/index">首页</a></li>
+            <li class="layui-nav-item"><a href="${contextPath}/admin/apps">应用管理</a></li>
+            <li class="layui-nav-item"><a href="${contextPath}/admin/users">用户管理</a></li>
+            <li class="layui-nav-item" lay-unselect="" style="float:right">
+                <a href="javascript:" id="log-out">退出</a>
+            </li>
+            <li class="layui-nav-item" lay-unselect="" style="float:right">
+                <a href="javascript:" id="change-password">修改密码</a>
+            </li>
+            <li class="layui-nav-item" lay-unselect="" style="float:right">
+                <a href="${contextPath}/admin/admin">${admin-username}</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="layui-container admin-main users-container">
+    <table id="users" lay-filter="users"></table>
+</div>
+
+<div class="admin-footer">
+    <div class="layui-container">
+        <p>Raiyee Amber © 2019</p>
+    </div>
+</div>
+
+<script type="text/html" class="user-toolbar">
+    <button type="button" class="layui-btn layui-btn-xs user-prv" lay-event="privilege">权限设置</button>
+    <button type="button" class="layui-btn layui-btn-xs user-reset" lay-event="reset">重置密码</button>
+    {{# if(d.available) { }}
+    <button type="button" class="layui-btn layui-btn-xs layui-btn-danger user-able" lay-event="switch">停用</button>
+    {{# } else { }}
+    <button type="button" class="layui-btn layui-btn-xs layui-btn-normal user-able" lay-event="switch">启用</button>
+    {{# } }}
+    <button type="button" class="layui-btn layui-btn-xs layui-btn-danger user-delete" lay-event="delete">删除</button>
+</script>
+
+<div class="layui-form layui-form-pane privilege-content" lay-filter="privilege-form" style="display:none">
+    <input name="username" type="hidden">
+    <div class="layui-form-item privilege-transfer">
+    </div>
+    <div class="layui-form-item">
+        <button class="layui-btn privilege-btn" lay-submit lay-filter="privilege">确认</button>
+    </div>
+</div>
+
+<div class="layui-form layui-form-pane reset-content" lay-filter="reset-form" style="display:none">
+    <input name="username" type="hidden">
+    <div class="layui-form-item">
+        <label class="layui-form-label">新密码</label>
+        <div class="layui-input-block">
+            <input name="password" type="password" lay-verify="required" lay-verType="tips"
+                   placeholder="请输入新密码" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <button class="layui-btn reset-btn" lay-submit lay-filter="reset">确认重置</button>
+    </div>
+</div>
+
+<script type="text/javascript" src="/res/layui/layui.js"></script>
+<script type="text/javascript" src="/res/admin/common.js"></script>
+<script type="text/javascript" src="/res/admin/users.js"></script>
+</body>
+</html>
