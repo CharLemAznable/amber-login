@@ -3,7 +3,7 @@ package main
 import (
     "errors"
     "github.com/CharLemAznable/gokits"
-    "github.com/bingoohuang/gou"
+    "github.com/bingoohuang/gou/ran"
     "github.com/mojocn/base64Captcha"
     "go.etcd.io/bbolt"
     "io/ioutil"
@@ -87,7 +87,7 @@ func serveAppCookie(handlerFunc http.HandlerFunc) http.HandlerFunc {
         appCookie := AppCookie{
             AppId:       appInfo.Id,
             RedirectUrl: appInfo.DefaultUrl,
-            Random:      gou.RandomString(16),
+            Random:      ran.String(16),
             ExpiredTime: time.Now().Add(time.Minute * 5), // expired 5 minutes
         }
         cookieValue := aesEncrypt(gokits.Json(appCookie), AESCipherKey)
@@ -319,7 +319,7 @@ func serveAppUserDoLogin(writer http.ResponseWriter, request *http.Request) {
 
     appUserCookie := AppUserCookie{
         Username:    appUsername,
-        Random:      gou.RandomString(16),
+        Random:      ran.String(16),
         ExpiredTime: time.Now().Add(time.Hour * time.Duration(appConfig.CookieExpiredHours)),
     }
     cookieValue := aesEncrypt(gokits.Json(appUserCookie), appInfo.EncryptKey)

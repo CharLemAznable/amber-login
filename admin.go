@@ -3,7 +3,7 @@ package main
 import (
     "errors"
     "github.com/CharLemAznable/gokits"
-    "github.com/bingoohuang/gou"
+    "github.com/bingoohuang/gou/ran"
     "github.com/mojocn/base64Captcha"
     "go.etcd.io/bbolt"
     "io/ioutil"
@@ -54,7 +54,7 @@ func authAdmin(handlerFunc http.HandlerFunc) http.HandlerFunc {
         }
 
         tempCookie := AdminCookie{
-            Random:      gou.RandomString(16),
+            Random:      ran.String(16),
             ExpiredTime: time.Now().Add(time.Hour * 24),
             Redirect:    request.RequestURI, // include contextPath prefix
         }
@@ -153,7 +153,7 @@ func serveAdminDoLogin(writer http.ResponseWriter, request *http.Request) {
 
     adminCookie := AdminCookie{
         Username:    loginReq.Username,
-        Random:      gou.RandomString(16),
+        Random:      ran.String(16),
         ExpiredTime: time.Now().Add(time.Hour),
     }
     cookieValue := aesEncrypt(gokits.Json(adminCookie), AESCipherKey)
@@ -228,7 +228,7 @@ func serveAdminChangePassword(writer http.ResponseWriter, request *http.Request)
 
 func serveAdminDoLogout(writer http.ResponseWriter, _ *http.Request) {
     tempCookie := AdminCookie{
-        Random:      gou.RandomString(16),
+        Random:      ran.String(16),
         ExpiredTime: time.Now().Add(time.Hour * 24),
         Redirect:    gokits.PathJoin(appConfig.ContextPath, "/admin/index"),
     }

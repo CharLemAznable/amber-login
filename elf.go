@@ -6,7 +6,7 @@ import (
     "context"
     "fmt"
     "github.com/CharLemAznable/gokits"
-    "github.com/bingoohuang/gou"
+    "github.com/bingoohuang/gou/htt"
     "io"
     "mime"
     "net/http"
@@ -87,9 +87,9 @@ func serveResources(prefix string) http.HandlerFunc {
 
         fileContent := string(MustAsset(filename))
         if strings.HasSuffix(filename, ".js") {
-            fileContent = gou.MinifyJs(fileContent, appConfig.DevMode)
+            fileContent = htt.MinifyJs(fileContent, appConfig.DevMode)
         } else if strings.HasSuffix(filename, ".css") {
-            fileContent = gou.MinifyCss(fileContent, appConfig.DevMode)
+            fileContent = htt.MinifyCSS(fileContent, appConfig.DevMode)
         }
         fileContent = strings.Replace(fileContent, "${contextPath}", appConfig.ContextPath, -1)
         buffer := bytes.NewReader([]byte(fileContent))
@@ -148,7 +148,7 @@ func serveModelContext(handlerFunc http.HandlerFunc) http.HandlerFunc {
 func serveHtmlPage(htmlName string) http.HandlerFunc {
     return func(writer http.ResponseWriter, request *http.Request) {
         html := string(MustAsset(htmlName + ".html"))
-        html = gou.MinifyHtml(html, appConfig.DevMode)
+        html = htt.MinifyHTML(html, appConfig.DevMode)
         html = strings.Replace(html, "${contextPath}", appConfig.ContextPath, -1)
 
         modelCtx := modelContext(request.Context())
