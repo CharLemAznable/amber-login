@@ -12,19 +12,19 @@ import (
 )
 
 // app login page
-// request with appId, [redirectUrl]
-// response with cookie(appId, redirectUrl) named by random string
+// request with appID, [redirectUrl]
+// response with cookie(appID, redirectUrl) named by random string
 
 func readRequestAppInfo(request *http.Request) (*AppInfo, error) {
-    appId := request.FormValue("appId")
-    if 0 == len(appId) {
-        return nil, errors.New("缺少参数appId")
+    appID := request.FormValue("appID")
+    if 0 == len(appID) {
+        return nil, errors.New("缺少参数appID")
     }
 
     var appInfo *AppInfo
     err := db.View(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(AppBucket))
-        appValue := string(bucket.Get([]byte(appId)))
+        appValue := string(bucket.Get([]byte(appID)))
         if 0 == len(appValue) {
             return errors.New("应用不存在")
         }
