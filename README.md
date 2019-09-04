@@ -19,3 +19,11 @@
 #### 统一登录入口
 
   `/?appId={appId}&redirectUrl={redirectUrl}`
+
+#### Golang Kits
+
+  [amber](https://github.com/CharLemAznable/amber)
+
+#### Java Kits
+
+  [amber-java-kits](https://github.com/CharLemAznable/amber-java-kits).

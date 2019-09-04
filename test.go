@@ -14,9 +14,9 @@ const TestCookieName = "amber-test"
 const TestEncryptKey = "pEzGamWj9DVVdExp"
 
 type TestCookie struct {
-    Username    string    `json:"username"`
-    Random      string    `json:"random"`
-    ExpiredTime time.Time `json:"expired-time"`
+    Username    string
+    Random      string
+    ExpiredTime time.Time
 }
 
 func readTestCookie(request *http.Request) (*TestCookie, error) {
