@@ -195,7 +195,7 @@ func authAppUser(handlerFunc http.HandlerFunc) http.HandlerFunc {
                 gokits.Json(map[string]string{"msg": "验证码不存在或已过期", "refresh": "1"}))
             return
         }
-        if !base64Captcha.VerifyCaptcha(cacheKey, loginReq.Captcha) {
+        if !base64Captcha.VerifyCaptchaAndIsClear(cacheKey, loginReq.Captcha, false) {
             gokits.ResponseJson(writer,
                 gokits.Json(map[string]string{"msg": "验证码错误"}))
             return
@@ -396,7 +396,7 @@ func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
             gokits.Json(map[string]string{"msg": "验证码不存在或已过期", "refresh": "1"}))
         return
     }
-    if !base64Captcha.VerifyCaptcha(cacheKey, registerReq.Captcha) {
+    if !base64Captcha.VerifyCaptchaAndIsClear(cacheKey, registerReq.Captcha, false) {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证码错误"}))
         return
@@ -500,7 +500,7 @@ func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Requ
             gokits.Json(map[string]string{"msg": "验证码不存在或已过期", "refresh": "1"}))
         return
     }
-    if !base64Captcha.VerifyCaptcha(cacheKey, changeReq.Captcha) {
+    if !base64Captcha.VerifyCaptchaAndIsClear(cacheKey, changeReq.Captcha, false) {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证码错误"}))
         return
