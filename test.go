@@ -8,7 +8,7 @@ import (
     "time"
 )
 
-const TestAppId = "1000"
+const TestAppID = "1000"
 const TestAppPath = "/test"
 const TestCookieName = "amber-test"
 const TestEncryptKey = "pEzGamWj9DVVdExp"
@@ -48,8 +48,8 @@ func authTest(handlerFunc http.HandlerFunc) http.HandlerFunc {
             return
         }
 
-        redirectUrl := gokits.PathJoin(appConfig.ContextPath, "?appId=" + TestAppId +
-            "&redirectUrl=" + url.QueryEscape(request.RequestURI))
+        redirectUrl := gokits.PathJoin(appConfig.ContextPath, "?appID="+TestAppID+
+            "&redirectUrl="+url.QueryEscape(request.RequestURI))
         http.Redirect(writer, request, redirectUrl, http.StatusFound)
     }
 }
