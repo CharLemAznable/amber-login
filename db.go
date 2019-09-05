@@ -56,14 +56,14 @@ func init() {
         }
         // initial test app for demo
         testAppInfo := AppInfo{
-            Id:           TestAppID,
+            Id:           TestAppId,
             Name:         "演示应用",
             CookieDomain: appConfig.CookieDomain,
             CookieName:   TestCookieName,
             EncryptKey:   TestEncryptKey,
             DefaultUrl:   gokits.PathJoin(appConfig.ContextPath, TestAppPath),
         }
-        err = appBucket.Put([]byte(TestAppID), []byte(gokits.Json(testAppInfo)))
+        err = appBucket.Put([]byte(TestAppId), []byte(gokits.Json(testAppInfo)))
         if err != nil {
             return fmt.Errorf("initial test app: %s", err.Error())
         }
