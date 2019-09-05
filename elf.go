@@ -74,7 +74,7 @@ func serveFavicon(path string) http.HandlerFunc {
 
 func serveResources(prefix string) http.HandlerFunc {
     return func(writer http.ResponseWriter, request *http.Request) {
-        filename := request.URL.Path[len(prefix):]
+        filename := request.URL.Path[len(gokits.PathJoin(appConfig.ContextPath, prefix)):]
         if strings.HasSuffix(filename, ".html") {
             writer.WriteHeader(http.StatusNotFound)
             return
