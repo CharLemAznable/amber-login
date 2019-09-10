@@ -1,0 +1,12 @@
+.logs-container.admin-main {
+    text-align: left;
+}
+
+.logs-container.admin-main .layui-table-page .layui-laypage {
+    position: absolute;
+    right: 7px;
+}
+
+.logs-container.admin-main .layui-table-view .layui-table {
+    width: 100%;
+}

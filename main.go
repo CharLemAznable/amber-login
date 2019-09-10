@@ -65,6 +65,12 @@ func main() {
     mux.Handle(gokits.PathJoin(appConfig.ContextPath, "/admin/users/websocket"),
         websocket.Handler(serveAdminUsersSocket))
 
+    // admin logs
+    handleFunc(mux, "/admin/logs",
+        authAdmin(serveHtmlPage("admin/logs")), true)
+    handleFunc(mux, "/admin/query-logs",
+        serveAjax(authAdmin(serveAdminQueryUserLoginLogs)), true)
+
     // user login/register/change-password
     handleFunc(mux, "/",
         serveCaptcha(serveAppCookie(serveHtmlPage("login"))), true)

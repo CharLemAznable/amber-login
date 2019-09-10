@@ -12,6 +12,7 @@ var db *bbolt.DB
 const AdminBucket = "admin"
 const AppBucket = "app"
 const UserBucket = "user"
+const LogBucket = "log"
 
 func init() {
     _db, err := bbolt.Open("./amber.db", 0666, nil)
@@ -28,7 +29,7 @@ func init() {
         // create administrator account
         adminInfo := string(adminBucket.Get([]byte("admin")))
         if 0 == len(adminInfo) {
-            err = adminBucket.Put([]byte("admin"), []byte(hmacSha256Base64("Admin18&$", PasswordKey)))
+            err = adminBucket.Put([]byte("admin"), []byte(hmacSha256Base64(AdminPassword, PasswordKey)))
             if err != nil {
                 return fmt.Errorf("create administrator account: %s", err.Error())
             }
@@ -36,7 +37,7 @@ func init() {
         // create manager account: password 'Manage12#$'
         manageInfo := string(adminBucket.Get([]byte("manage")))
         if 0 == len(manageInfo) {
-            err = adminBucket.Put([]byte("manage"), []byte(hmacSha256Base64("Manage12#$", PasswordKey)))
+            err = adminBucket.Put([]byte("manage"), []byte(hmacSha256Base64(ManagePassword, PasswordKey)))
             if err != nil {
                 return fmt.Errorf("create manager account: %s", err.Error())
             }
@@ -71,6 +72,11 @@ func init() {
         _, err = tx.CreateBucketIfNotExists([]byte(UserBucket))
         if err != nil {
             return fmt.Errorf("create bucket "+UserBucket+": %s", err.Error())
+        }
+
+        _, err = tx.CreateBucketIfNotExists([]byte(LogBucket))
+        if err != nil {
+            return fmt.Errorf("create bucket "+LogBucket+": %s", err.Error())
         }
 
         err = os.MkdirAll("./backup", 0777)

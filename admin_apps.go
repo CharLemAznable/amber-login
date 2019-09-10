@@ -18,7 +18,7 @@ type AppInfo struct {
 }
 
 func serveAdminQueryApps(writer http.ResponseWriter, _ *http.Request) {
-    var appInfoArray = make([]AppInfo, 0)
+    appInfoArray := make([]AppInfo, 0)
 
     err := db.View(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(AppBucket))

@@ -309,6 +309,25 @@ func serveAppUserDoLogin(writer http.ResponseWriter, request *http.Request) {
         return
     }
 
+    go func() {
+        err := db.Update(func(tx *bbolt.Tx) error {
+            bucket := tx.Bucket([]byte(LogBucket))
+            log := UserLoginLog{
+                Username:    appUsername,
+                AppId:       appInfo.Id,
+                AppName:     appInfo.Name,
+                RedirectUrl: redirectUrl,
+                LoginTime:   JsonableTime(time.Now()),
+            }
+            return bucket.Put(
+                []byte(time.Now().Format(JsonableTimeFormat)),
+                []byte(gokits.Json(log)))
+        })
+        if err != nil {
+            _ = gokits.LOG.Error("User Login logger Error: %s", err.Error())
+        }
+    }()
+
     existsCookie, err := readAppUserCookie(
         request, appInfo.CookieName, appInfo.EncryptKey)
     if nil == err && existsCookie.Username == appUsername {
@@ -414,8 +433,8 @@ func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
         newUser := UserInfo{
             Username:   registerReq.Username,
             Password:   hmacSha256Base64(registerReq.Password, PasswordKey),
-            CreateTime: UserInfoTime(time.Now()),
-            UpdateTime: UserInfoTime(time.Now()),
+            CreateTime: JsonableTime(time.Now()),
+            UpdateTime: JsonableTime(time.Now()),
         }
         return bucket.Put([]byte(registerReq.Username),
             []byte(gokits.Json(newUser)))
@@ -525,7 +544,7 @@ func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Requ
         }
 
         userInfo.Password = hmacSha256Base64(changeReq.NewPassword, PasswordKey)
-        userInfo.UpdateTime = UserInfoTime(time.Now())
+        userInfo.UpdateTime = JsonableTime(time.Now())
         return bucket.Put([]byte(changeReq.Username),
             []byte(gokits.Json(userInfo)))
     })

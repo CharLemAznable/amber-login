@@ -13,7 +13,26 @@ import (
     "net/http/httputil"
     "path/filepath"
     "strings"
+    "time"
 )
+
+type JsonableTime time.Time
+
+const JsonableTimeFormat = "2006-01-02 15:04:05"
+
+func (t JsonableTime) MarshalJSON() ([]byte, error) {
+    b := make([]byte, 0, len(JsonableTimeFormat)+2)
+    b = append(b, '"')
+    b = time.Time(t).AppendFormat(b, JsonableTimeFormat)
+    b = append(b, '"')
+    return b, nil
+}
+
+func (t *JsonableTime) UnmarshalJSON(b []byte) error {
+    now, err := time.ParseInLocation(`"`+JsonableTimeFormat+`"`, string(b), time.Local)
+    *t = JsonableTime(now)
+    return err
+}
 
 func dumpRequest(handlerFunc http.HandlerFunc) http.HandlerFunc {
     return func(writer http.ResponseWriter, request *http.Request) {

@@ -7,8 +7,6 @@ import (
     "encoding/base64"
 )
 
-const PasswordKey = "192006250b4c09247ec02edce69f6a2d"
-
 func hmacSha256Base64(plainText string, key string) string {
     hasher := hmac.New(sha256.New, []byte(key))
     hasher.Write([]byte(plainText))
@@ -25,8 +23,6 @@ func generateKey(key []byte) []byte {
     }
     return genKey
 }
-
-const AESCipherKey = "0b4c09247ec02edc"
 
 func aesEncrypt(value, key string) string {
     cipher, _ := aes.NewCipher(generateKey([]byte(key)))

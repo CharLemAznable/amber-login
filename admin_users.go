@@ -12,35 +12,17 @@ import (
     "time"
 )
 
-const UserInfoTimeFormat = "2006-01-02 15:04:05"
-
-type UserInfoTime time.Time
-
-func (t UserInfoTime) MarshalJSON() ([]byte, error) {
-    b := make([]byte, 0, len(UserInfoTimeFormat)+2)
-    b = append(b, '"')
-    b = time.Time(t).AppendFormat(b, UserInfoTimeFormat)
-    b = append(b, '"')
-    return b, nil
-}
-
-func (t *UserInfoTime) UnmarshalJSON(b []byte) error {
-    now, err := time.ParseInLocation(`"`+UserInfoTimeFormat+`"`, string(b), time.Local)
-    *t = UserInfoTime(now)
-    return err
-}
-
 type UserInfo struct {
     Username   string       `json:"username"`
     Password   string       `json:"password"`
     Available  bool         `json:"available"`
-    CreateTime UserInfoTime `json:"create-time"`
-    UpdateTime UserInfoTime `json:"update-time"`
+    CreateTime JsonableTime `json:"create-time"`
+    UpdateTime JsonableTime `json:"update-time"`
     AppIds     []string     `json:"app-ids"`
 }
 
 func serveAdminQueryUsers(writer http.ResponseWriter, _ *http.Request) {
-    var userInfoArray = make([]UserInfo, 0)
+    userInfoArray := make([]UserInfo, 0)
 
     err := db.View(func(tx *bbolt.Tx) error {
         userBucket := tx.Bucket([]byte(UserBucket))
@@ -73,7 +55,7 @@ type AppTransferInfo struct {
 }
 
 func serveAdminQueryAppTransfers(writer http.ResponseWriter, _ *http.Request) {
-    var appTransferInfoArray = make([]AppTransferInfo, 0)
+    appTransferInfoArray := make([]AppTransferInfo, 0)
 
     err := db.View(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(AppBucket))
@@ -132,7 +114,7 @@ func serveAdminSetUserPrivileges(writer http.ResponseWriter, request *http.Reque
             return errors.New("用户数据解析失败")
         }
         userInfo.AppIds = submitReq.AppIds
-        userInfo.UpdateTime = UserInfoTime(time.Now())
+        userInfo.UpdateTime = JsonableTime(time.Now())
         return bucket.Put([]byte(submitReq.Username), []byte(gokits.Json(userInfo)))
     })
     if err != nil {
@@ -177,7 +159,7 @@ func serveAdminResetUserPassword(writer http.ResponseWriter, request *http.Reque
             return errors.New("用户数据解析失败")
         }
         userInfo.Password = hmacSha256Base64(submitReq.Password, PasswordKey)
-        userInfo.UpdateTime = UserInfoTime(time.Now())
+        userInfo.UpdateTime = JsonableTime(time.Now())
         return bucket.Put([]byte(submitReq.Username),
             []byte(gokits.Json(userInfo)))
     })
@@ -218,7 +200,7 @@ func serveAdminSwitchToggleUser(writer http.ResponseWriter, request *http.Reques
             return errors.New("用户数据解析失败")
         }
         userInfo.Available = !userInfo.Available
-        userInfo.UpdateTime = UserInfoTime(time.Now())
+        userInfo.UpdateTime = JsonableTime(time.Now())
         return bucket.Put([]byte(submitReq.Username),
             []byte(gokits.Json(userInfo)))
     })
@@ -314,7 +296,7 @@ func adminSocketUsersSend(ws *websocket.Conn) error {
     defer adminSocketCond.L.Unlock()
     adminSocketCond.Wait()
 
-    var userInfoArray = make([]UserInfo, 0)
+    userInfoArray := make([]UserInfo, 0)
     err := db.View(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(UserBucket))
         cursor := bucket.Cursor()
