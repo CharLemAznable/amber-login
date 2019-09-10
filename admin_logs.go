@@ -33,7 +33,9 @@ func serveAdminQueryUserLoginLogs(writer http.ResponseWriter, request *http.Requ
         for i := 0; i < start; i++ {
             k, v = cursor.Prev()
         }
-        for ; k != nil; k, v = cursor.Prev() {
+
+        for i := 0; k != nil && i < limit;
+        k, v, i = pagingForLoopIncrease(cursor, i) {
             log, ok := gokits.UnJson(string(v),
                 new(UserLoginLog)).(*UserLoginLog)
             if !ok || nil == log {
@@ -62,4 +64,9 @@ func formIntValue(request *http.Request, key string, defaultValue int) int {
         return intValue
     }
     return defaultValue
+}
+
+func pagingForLoopIncrease(cursor *bbolt.Cursor, i int) ([]byte, []byte, int) {
+    k, v := cursor.Prev()
+    return k, v, i + 1
 }
