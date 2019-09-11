@@ -320,7 +320,7 @@ func serveAppUserDoLogin(writer http.ResponseWriter, request *http.Request) {
                 LoginTime:   JsonableTime(time.Now()),
             }
             return bucket.Put(
-                []byte(time.Now().Format(JsonableTimeFormat)),
+                []byte(gokits.StrFromInt64(time.Now().UnixNano())),
                 []byte(gokits.Json(log)))
         })
         if err != nil {
