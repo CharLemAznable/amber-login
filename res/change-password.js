@@ -18,10 +18,14 @@ layui.use(['jquery', 'layer', 'form'], function () {
         move: false,
     });
 
-    $('.captcha-input').on('keydown', function (event) {
+    $(document).on('keydown', function (event) {
         // noinspection JSDeprecatedSymbols
         if (event.keyCode === 13) {
-            $('.change-password-btn').click();
+            if ($(document).find(".layui-layer").length === 1) {
+                $('.change-password-btn').click();
+            } else {
+                layer.close(layer.index);
+            }
         }
     });
 
