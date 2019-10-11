@@ -21,7 +21,7 @@ layui.use(['jquery', 'layer', 'form'], function () {
     $(document).on('keydown', function (event) {
         // noinspection JSDeprecatedSymbols
         if (event.keyCode === 13) {
-            if ($(document).find(".layui-layer").length === 1) {
+            if ($(document).find('.layui-layer').length === 1) {
                 $('.login-btn').click();
             } else {
                 layer.close(layer.index);

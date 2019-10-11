@@ -3,6 +3,13 @@ layui.use(['jquery', 'layer', 'form'], function () {
     let layer = layui.layer;
     let form = layui.form;
 
+    form.verify({
+        pass: [
+            /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/,
+            '密码必须为6-20位, 必须包含字母和数字'
+        ]
+    });
+
     layer.open({
         type: 1,
         title: '用户注册',
@@ -21,7 +28,7 @@ layui.use(['jquery', 'layer', 'form'], function () {
     $(document).on('keydown', function (event) {
         // noinspection JSDeprecatedSymbols
         if (event.keyCode === 13) {
-            if ($(document).find(".layui-layer").length === 1) {
+            if ($(document).find('.layui-layer').length === 1) {
                 $('.register-btn').click();
             } else {
                 layer.close(layer.index);

@@ -8,6 +8,7 @@ import (
     "go.etcd.io/bbolt"
     "io/ioutil"
     "net/http"
+    "regexp"
     "time"
 )
 
@@ -51,9 +52,15 @@ func readRequestAppInfo(request *http.Request) (*AppInfo, error) {
 }
 
 var cookieNameCache *gokits.CacheTable
+var passRegexpDigit *regexp.Regexp
+var passRegexpAlpha *regexp.Regexp
+var passRegexpCount *regexp.Regexp
 
 func init() {
     cookieNameCache = gokits.CacheExpireAfterWrite("cookieNameCache")
+    passRegexpDigit = regexp.MustCompile(`^.*?[0-9]+.*$`)
+    passRegexpAlpha = regexp.MustCompile(`^.*?[a-zA-Z]+.*$`)
+    passRegexpCount = regexp.MustCompile(`^[0-9A-Za-z]{6,20}$`)
 }
 
 const CookieNameLen = 20
@@ -382,6 +389,13 @@ func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
             gokits.Json(map[string]string{"msg": "密码不能为空"}))
         return
     }
+    if !passRegexpDigit.MatchString(registerReq.Password) ||
+        !passRegexpAlpha.MatchString(registerReq.Password) ||
+        !passRegexpCount.MatchString(registerReq.Password) {
+        gokits.ResponseJson(writer,
+            gokits.Json(map[string]string{"msg": "密码必须为6-20位, 必须包含字母和数字"}))
+        return
+    }
     if 0 == len(registerReq.RePassword) {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "确认密码不能为空"}))
@@ -484,6 +498,13 @@ func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Requ
     if 0 == len(changeReq.NewPassword) {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "新密码不能为空"}))
+        return
+    }
+    if !passRegexpDigit.MatchString(changeReq.NewPassword) ||
+        !passRegexpAlpha.MatchString(changeReq.NewPassword) ||
+        !passRegexpCount.MatchString(changeReq.NewPassword) {
+        gokits.ResponseJson(writer,
+            gokits.Json(map[string]string{"msg": "新密码必须为6-20位, 必须包含字母和数字"}))
         return
     }
     if 0 == len(changeReq.RenewPassword) {
