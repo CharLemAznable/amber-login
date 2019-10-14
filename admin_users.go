@@ -146,6 +146,13 @@ func serveAdminResetUserPassword(writer http.ResponseWriter, request *http.Reque
             gokits.Json(map[string]string{"msg": "新密码不能为空"}))
         return
     }
+    if !passRegexpDigit.MatchString(submitReq.Password) ||
+        !passRegexpAlpha.MatchString(submitReq.Password) ||
+        !passRegexpCount.MatchString(submitReq.Password) {
+        gokits.ResponseJson(writer,
+            gokits.Json(map[string]string{"msg": "密码必须为6-20位, 必须包含字母和数字"}))
+        return
+    }
 
     err := db.Update(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(UserBucket))

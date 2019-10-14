@@ -12,6 +12,13 @@ layui.use(['jquery', 'layer', 'table', 'form', 'transfer'], function () {
         {toolbar: '.user-toolbar', title: '操作'},
     ];
 
+    form.verify({
+        pass: [
+            /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/,
+            '密码必须为6-20位, 必须包含字母和数字'
+        ]
+    });
+
     let load = layer.load(1, {shade: 0.6});
     $.ajax({
         url: '${contextPath}/admin/query-users',
