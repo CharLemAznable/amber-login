@@ -81,7 +81,7 @@ func serveAppCookie(handlerFunc http.HandlerFunc) http.HandlerFunc {
                 gokits.ResponseJson(writer,
                     gokits.Json(map[string]string{"msg": err.Error()}))
             } else {
-                http.NotFound(writer, request)
+                http.Error(writer, "Request Parameters Error", http.StatusBadRequest)
             }
             return
         }
