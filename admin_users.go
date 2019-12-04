@@ -148,9 +148,10 @@ func serveAdminResetUserPassword(writer http.ResponseWriter, request *http.Reque
     }
     if !passRegexpDigit.MatchString(submitReq.Password) ||
         !passRegexpAlpha.MatchString(submitReq.Password) ||
+        !passRegexpSymbl.MatchString(submitReq.Password) ||
         !passRegexpCount.MatchString(submitReq.Password) {
         gokits.ResponseJson(writer,
-            gokits.Json(map[string]string{"msg": "密码必须为6-20位, 必须包含字母和数字"}))
+            gokits.Json(map[string]string{"msg": "密码必须为10-20位, 必须包含字母数字和特殊字符"}))
         return
     }
 

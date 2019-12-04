@@ -54,13 +54,15 @@ func readRequestAppInfo(request *http.Request) (*AppInfo, error) {
 var cookieNameCache *gokits.CacheTable
 var passRegexpDigit *regexp.Regexp
 var passRegexpAlpha *regexp.Regexp
+var passRegexpSymbl *regexp.Regexp
 var passRegexpCount *regexp.Regexp
 
 func init() {
     cookieNameCache = gokits.CacheExpireAfterWrite("cookieNameCache")
     passRegexpDigit = regexp.MustCompile(`^.*?[0-9]+.*$`)
     passRegexpAlpha = regexp.MustCompile(`^.*?[a-zA-Z]+.*$`)
-    passRegexpCount = regexp.MustCompile(`^[0-9A-Za-z]{6,20}$`)
+    passRegexpSymbl = regexp.MustCompile("^.*?[!-/:-@\\[-`]+.*$")
+    passRegexpCount = regexp.MustCompile(`^[0-9A-Za-z]{10,20}$`)
 }
 
 const CookieNameLen = 20
@@ -391,9 +393,10 @@ func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
     }
     if !passRegexpDigit.MatchString(registerReq.Password) ||
         !passRegexpAlpha.MatchString(registerReq.Password) ||
+        !passRegexpSymbl.MatchString(registerReq.Password) ||
         !passRegexpCount.MatchString(registerReq.Password) {
         gokits.ResponseJson(writer,
-            gokits.Json(map[string]string{"msg": "密码必须为6-20位, 必须包含字母和数字"}))
+            gokits.Json(map[string]string{"msg": "密码必须为10-20位, 必须包含字母数字和特殊字符"}))
         return
     }
     if 0 == len(registerReq.RePassword) {
@@ -502,9 +505,10 @@ func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Requ
     }
     if !passRegexpDigit.MatchString(changeReq.NewPassword) ||
         !passRegexpAlpha.MatchString(changeReq.NewPassword) ||
+        !passRegexpSymbl.MatchString(changeReq.NewPassword) ||
         !passRegexpCount.MatchString(changeReq.NewPassword) {
         gokits.ResponseJson(writer,
-            gokits.Json(map[string]string{"msg": "新密码必须为6-20位, 必须包含字母和数字"}))
+            gokits.Json(map[string]string{"msg": "新密码必须为10-20位, 必须包含字母数字和特殊字符"}))
         return
     }
     if 0 == len(changeReq.RenewPassword) {
