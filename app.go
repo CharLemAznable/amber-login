@@ -59,10 +59,10 @@ var passRegexpCount *regexp.Regexp
 
 func init() {
     cookieNameCache = gokits.CacheExpireAfterWrite("cookieNameCache")
-    passRegexpDigit = regexp.MustCompile(`^.*?[0-9]+.*$`)
-    passRegexpAlpha = regexp.MustCompile(`^.*?[a-zA-Z]+.*$`)
+    passRegexpDigit = regexp.MustCompile("^.*?[0-9]+.*$")
+    passRegexpAlpha = regexp.MustCompile("^.*?[a-zA-Z]+.*$")
     passRegexpSymbl = regexp.MustCompile("^.*?[!-/:-@\\[-`]+.*$")
-    passRegexpCount = regexp.MustCompile(`^[0-9A-Za-z]{10,20}$`)
+    passRegexpCount = regexp.MustCompile("^[0-9A-Za-z!-/:-@\\[-`]{10,20}$")
 }
 
 const CookieNameLen = 20
