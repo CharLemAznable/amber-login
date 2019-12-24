@@ -34,9 +34,9 @@ before_deploy:
   - tar -cvJf $AMBER_LOGIN_NAME.darwin.386.tar.xz $AMBER_LOGIN_NAME.darwin.386.bin
   - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.darwin.amd64.bin
   - tar -cvJf $AMBER_LOGIN_NAME.darwin.amd64.tar.xz $AMBER_LOGIN_NAME.darwin.amd64.bin
-  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.windows.386.exe
+  - travis_wait ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.windows.386.exe
   - tar -cvJf $AMBER_LOGIN_NAME.windows.386.tar.xz $AMBER_LOGIN_NAME.windows.386.exe
-  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.windows.amd64.exe
+  - travis_wait ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.windows.amd64.exe
   - tar -cvJf $AMBER_LOGIN_NAME.windows.amd64.tar.xz $AMBER_LOGIN_NAME.windows.amd64.exe
 deploy:
   provider: releases
