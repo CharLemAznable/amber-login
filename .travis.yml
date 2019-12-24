@@ -2,40 +2,41 @@ arch: amd64
 dist: trusty
 language: go
 go:
-- 1.12.x
+  - 1.12.x
 before_script:
-- |
-  if [ -z "$TRAVIS_TAG" ]; then
-    export AMBER_LOGIN_NAME=amber-login-dev
-  else
-    export AMBER_LOGIN_NAME=amber-login-$TRAVIS_TAG
-  fi
+  - |
+    if [ -z "$TRAVIS_TAG" ]; then
+      export AMBER_LOGIN_NAME=amber-login-dev
+    else
+      export AMBER_LOGIN_NAME=amber-login-$TRAVIS_TAG
+    fi
+  - export GO111MODULE=on
 script:
-- go test -test.bench=.* -coverprofile=coverage.txt -covermode=atomic
-- echo "building "$AMBER_LOGIN_NAME" ..."
-- env GOOS=linux GOARCH=386 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.linux.386.bin
-- env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.linux.amd64.bin
-- env GOOS=darwin GOARCH=386 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.darwin.386.bin
-- env GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.darwin.amd64.bin
-- env GOOS=windows GOARCH=386 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.windows.386.exe
-- env GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.windows.amd64.exe
+  - go test -test.bench=.* -coverprofile=coverage.txt -covermode=atomic
+  - echo "building "$AMBER_LOGIN_NAME" ..."
+  - env GOOS=linux GOARCH=386 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.linux.386.bin
+  - env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.linux.amd64.bin
+  - env GOOS=darwin GOARCH=386 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.darwin.386.bin
+  - env GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.darwin.amd64.bin
+  - env GOOS=windows GOARCH=386 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.windows.386.exe
+  - env GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.windows.amd64.exe
 after_success:
-- bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash)
 before_deploy:
-- wget https://github.com/upx/upx/releases/download/v3.95/upx-3.95-amd64_linux.tar.xz
-- tar -xvJf upx-3.95-amd64_linux.tar.xz
-- "./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.linux.386.bin"
-- tar -cvJf $AMBER_LOGIN_NAME.linux.386.tar.xz $AMBER_LOGIN_NAME.linux.386.bin
-- "./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.linux.amd64.bin"
-- tar -cvJf $AMBER_LOGIN_NAME.linux.amd64.tar.xz $AMBER_LOGIN_NAME.linux.amd64.bin
-- "./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.darwin.386.bin"
-- tar -cvJf $AMBER_LOGIN_NAME.darwin.386.tar.xz $AMBER_LOGIN_NAME.darwin.386.bin
-- "./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.darwin.amd64.bin"
-- tar -cvJf $AMBER_LOGIN_NAME.darwin.amd64.tar.xz $AMBER_LOGIN_NAME.darwin.amd64.bin
-- "./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.windows.386.exe"
-- tar -cvJf $AMBER_LOGIN_NAME.windows.386.tar.xz $AMBER_LOGIN_NAME.windows.386.exe
-- "./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.windows.amd64.exe"
-- tar -cvJf $AMBER_LOGIN_NAME.windows.amd64.tar.xz $AMBER_LOGIN_NAME.windows.amd64.exe
+  - wget https://github.com/upx/upx/releases/download/v3.95/upx-3.95-amd64_linux.tar.xz
+  - tar -xvJf upx-3.95-amd64_linux.tar.xz
+  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.linux.386.bin
+  - tar -cvJf $AMBER_LOGIN_NAME.linux.386.tar.xz $AMBER_LOGIN_NAME.linux.386.bin
+  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.linux.amd64.bin
+  - tar -cvJf $AMBER_LOGIN_NAME.linux.amd64.tar.xz $AMBER_LOGIN_NAME.linux.amd64.bin
+  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.darwin.386.bin
+  - tar -cvJf $AMBER_LOGIN_NAME.darwin.386.tar.xz $AMBER_LOGIN_NAME.darwin.386.bin
+  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.darwin.amd64.bin
+  - tar -cvJf $AMBER_LOGIN_NAME.darwin.amd64.tar.xz $AMBER_LOGIN_NAME.darwin.amd64.bin
+  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.windows.386.exe
+  - tar -cvJf $AMBER_LOGIN_NAME.windows.386.tar.xz $AMBER_LOGIN_NAME.windows.386.exe
+  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.windows.amd64.exe
+  - tar -cvJf $AMBER_LOGIN_NAME.windows.amd64.tar.xz $AMBER_LOGIN_NAME.windows.amd64.exe
 deploy:
   provider: releases
   api_key:
