@@ -3,6 +3,8 @@ dist: trusty
 language: go
 go:
   - 1.12.x
+before_install:
+  - export GO111MODULE=on
 before_script:
   - |
     if [ -z "$TRAVIS_TAG" ]; then
@@ -10,7 +12,6 @@ before_script:
     else
       export AMBER_LOGIN_NAME=amber-login-$TRAVIS_TAG
     fi
-  - export GO111MODULE=on
 script:
   - go test -test.bench=.* -coverprofile=coverage.txt -covermode=atomic
   - echo "building "$AMBER_LOGIN_NAME" ..."
