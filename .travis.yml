@@ -8,42 +8,42 @@ before_install:
 before_script:
   - |
     if [ -z "$TRAVIS_TAG" ]; then
-      export AMBER_LOGIN_NAME=amber-login-dev
+      export TARGET_NAME=amber-login-dev
     else
-      export AMBER_LOGIN_NAME=amber-login-$TRAVIS_TAG
+      export TARGET_NAME=amber-login-$TRAVIS_TAG
     fi
 script:
   - go test -test.bench=.* -coverprofile=coverage.txt -covermode=atomic
-  - echo "building "$AMBER_LOGIN_NAME" ..."
-  - env GOOS=linux GOARCH=386 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.linux.386.bin
-  - env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.linux.amd64.bin
-  - env GOOS=darwin GOARCH=386 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.darwin.386.bin
-  - env GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.darwin.amd64.bin
-  - env GOOS=windows GOARCH=386 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.windows.386.exe
-  - env GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o $AMBER_LOGIN_NAME.windows.amd64.exe
+  - echo "building "$TARGET_NAME" ..."
+  - env GOOS=linux GOARCH=386 go build -ldflags="-s -w" -o $TARGET_NAME.linux.386.bin
+  - env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o $TARGET_NAME.linux.amd64.bin
+  - env GOOS=darwin GOARCH=386 go build -ldflags="-s -w" -o $TARGET_NAME.darwin.386.bin
+  - env GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o $TARGET_NAME.darwin.amd64.bin
+  - env GOOS=windows GOARCH=386 go build -ldflags="-s -w" -o $TARGET_NAME.windows.386.exe
+  - env GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o $TARGET_NAME.windows.amd64.exe
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 before_deploy:
   - wget https://github.com/upx/upx/releases/download/v3.95/upx-3.95-amd64_linux.tar.xz
   - tar -xvJf upx-3.95-amd64_linux.tar.xz
-  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.linux.386.bin
-  - tar -cvJf $AMBER_LOGIN_NAME.linux.386.tar.xz $AMBER_LOGIN_NAME.linux.386.bin
-  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.linux.amd64.bin
-  - tar -cvJf $AMBER_LOGIN_NAME.linux.amd64.tar.xz $AMBER_LOGIN_NAME.linux.amd64.bin
-  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.darwin.386.bin
-  - tar -cvJf $AMBER_LOGIN_NAME.darwin.386.tar.xz $AMBER_LOGIN_NAME.darwin.386.bin
-  - ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.darwin.amd64.bin
-  - tar -cvJf $AMBER_LOGIN_NAME.darwin.amd64.tar.xz $AMBER_LOGIN_NAME.darwin.amd64.bin
-  - travis_wait ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.windows.386.exe
-  - tar -cvJf $AMBER_LOGIN_NAME.windows.386.tar.xz $AMBER_LOGIN_NAME.windows.386.exe
-  - travis_wait ./upx-3.95-amd64_linux/upx --brute $AMBER_LOGIN_NAME.windows.amd64.exe
-  - tar -cvJf $AMBER_LOGIN_NAME.windows.amd64.tar.xz $AMBER_LOGIN_NAME.windows.amd64.exe
+  - ./upx-3.95-amd64_linux/upx --brute $TARGET_NAME.linux.386.bin
+  - tar -cvJf $TARGET_NAME.linux.386.tar.xz $TARGET_NAME.linux.386.bin
+  - ./upx-3.95-amd64_linux/upx --brute $TARGET_NAME.linux.amd64.bin
+  - tar -cvJf $TARGET_NAME.linux.amd64.tar.xz $TARGET_NAME.linux.amd64.bin
+  - ./upx-3.95-amd64_linux/upx --brute $TARGET_NAME.darwin.386.bin
+  - tar -cvJf $TARGET_NAME.darwin.386.tar.xz $TARGET_NAME.darwin.386.bin
+  - ./upx-3.95-amd64_linux/upx --brute $TARGET_NAME.darwin.amd64.bin
+  - tar -cvJf $TARGET_NAME.darwin.amd64.tar.xz $TARGET_NAME.darwin.amd64.bin
+  - travis_wait ./upx-3.95-amd64_linux/upx --brute $TARGET_NAME.windows.386.exe
+  - tar -cvJf $TARGET_NAME.windows.386.tar.xz $TARGET_NAME.windows.386.exe
+  - travis_wait ./upx-3.95-amd64_linux/upx --brute $TARGET_NAME.windows.amd64.exe
+  - tar -cvJf $TARGET_NAME.windows.amd64.tar.xz $TARGET_NAME.windows.amd64.exe
 deploy:
   provider: releases
   api_key:
     secure: J8b955y9fyd+jZA3b10QZSSlN6Yj7NxR1Sn4373y0R+tV3209d+v+7kJcsn8+WXLf6CzpAceRiTTaUUGYjMe4C/Yi1OCvRcyLlBO8rkuc+s16kMIoxFMkAhkSEMn1EmCKKCId0RVbRN0PQzwTwbJMjPyt6A4ZvmFLgnDe2zPfjijuZwnq7cXq1ZN6at6CrXes1RxcUysmX01atG2oCL4D8CEiD0pL+jSjD1I+yD7Qi/y4RnuQLE1i8NppJVh7WGXAi2BHLQImH/VjX4gpmAWvOuFt6lf/gNkFQvv1kzZVr4w6dLBWJpZu4Zt0+h6O0HwoG8iUqhZnRQ5vM3UTKKEwYKdr3LxY1BhIyBnNNAX9GszUvcEb7jgj4NacY//dhzEI8TXCz6bm/wsv8k/IekBrl0cLH6yCi+QFPbo4oRP27ljav9m9AoQhIXVXDNuDPJ1Y91SBt3/BpKSdJiAbg43g1AfZm7DH43bbyw+0K0zt+qSHbxBIntY44iVkwx9ZU76ZBqo9cVaQWwuS+5nk0S0aFqUbWs7Bj1RoXsWLz/1lMI4ufnuHUPUUtkrc6E4hHRVKW+Ainb1je1td/87FOD1fWa0pKPcwbIGpx4jjkOhxd2Y/J+eEkYNX2lib3Z64vgH5ciG8nRlw0qtRxA/jjGXb5sYx70G0YvpUHnuf1bnjsY=
   file_glob: true
-  file: $AMBER_LOGIN_NAME.*.tar.xz
+  file: $TARGET_NAME.*.tar.xz
   skip_cleanup: true
   on:
     repo: CharLemAznable/amber-login

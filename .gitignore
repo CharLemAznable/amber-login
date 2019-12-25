@@ -17,4 +17,5 @@ go.sum
 
 amber.db
 backup
-amber-login.linux.bin
+amber-login.bin
+amber-login.log
