@@ -28,7 +28,7 @@ DevMode = false
         <tag>file</tag>
         <type>file</type>
         <level>INFO</level>
-        <property name="filename">sonar-qyhook.log</property>
+        <property name="filename">amber.log</property>
         <property name="format">[%D %T] [%L] (%S) %M</property>
         <property name="rotate">false</property>
         <property name="maxsize">0M</property>
