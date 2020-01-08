@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
     "github.com/CharLemAznable/gokits"
     "testing"
     "time"
@@ -34,9 +35,11 @@ func TestDetectContentType(t *testing.T) {
     if "text/html; charset=utf-8" != detectContentType("a.html") {
         t.Errorf("Should be text/html; charset=utf-8")
     }
+    fmt.Println(detectContentType("a.ico"))
     if "image/x-icon" != detectContentType("a.ico") {
         t.Errorf("Should be image/x-icon")
     }
+    fmt.Println(detectContentType("a.dat"))
     if "application/octet-stream" != detectContentType("a.dat") {
         t.Errorf("Should be application/octet-stream")
     }
