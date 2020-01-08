@@ -29,7 +29,7 @@ func init() {
         // create administrator account
         adminInfo := string(adminBucket.Get([]byte("admin")))
         if 0 == len(adminInfo) {
-            err = adminBucket.Put([]byte("admin"), []byte(hmacSha256Base64(AdminPassword, PasswordKey)))
+            err = adminBucket.Put([]byte("admin"), []byte(gokits.HmacSha256Base64(AdminPassword, PasswordKey)))
             if err != nil {
                 return fmt.Errorf("create administrator account: %s", err.Error())
             }
@@ -37,7 +37,7 @@ func init() {
         // create manager account: password 'Manage12#$'
         manageInfo := string(adminBucket.Get([]byte("manage")))
         if 0 == len(manageInfo) {
-            err = adminBucket.Put([]byte("manage"), []byte(hmacSha256Base64(ManagePassword, PasswordKey)))
+            err = adminBucket.Put([]byte("manage"), []byte(gokits.HmacSha256Base64(ManagePassword, PasswordKey)))
             if err != nil {
                 return fmt.Errorf("create manager account: %s", err.Error())
             }

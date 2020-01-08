@@ -5,7 +5,6 @@ import (
     "github.com/CharLemAznable/gokits"
     "github.com/mojocn/base64Captcha"
     "go.etcd.io/bbolt"
-    "io/ioutil"
     "net/http"
     "regexp"
     "time"
@@ -78,7 +77,7 @@ func serveAppCookie(handlerFunc http.HandlerFunc) http.HandlerFunc {
     return func(writer http.ResponseWriter, request *http.Request) {
         appInfo, err := readRequestAppInfo(request)
         if nil != err {
-            if isAjaxRequest(request) {
+            if gokits.IsAjaxRequest(request) {
                 gokits.ResponseJson(writer,
                     gokits.Json(map[string]string{"msg": err.Error()}))
             } else {
@@ -87,10 +86,10 @@ func serveAppCookie(handlerFunc http.HandlerFunc) http.HandlerFunc {
             return
         }
 
-        appCookieName := randomString(CookieNameLen)
+        appCookieName := gokits.RandomString(CookieNameLen)
         cookieNameCache.Add(appCookieName, time.Minute*5, appCookieName) // cache 5 minutes
-        modelCtx := modelContextWithValue(request.Context(),
-            CookieNameAttrKey, appCookieName)
+        modelCtx := gokits.ModelContextWithValue(
+            request.Context(), CookieNameAttrKey, appCookieName)
 
         appCookie := AppCookie{
             AppId:       appInfo.Id,
@@ -98,7 +97,7 @@ func serveAppCookie(handlerFunc http.HandlerFunc) http.HandlerFunc {
             Random:      randomCookieField(),
             ExpiredTime: time.Now().Add(time.Minute * 5), // expired 5 minutes
         }
-        cookieValue := aesEncrypt(gokits.Json(appCookie), AESCipherKey)
+        cookieValue := gokits.AESEncrypt(gokits.Json(appCookie), AESCipherKey)
         cookie := http.Cookie{Name: appCookieName,
             Value: cookieValue, Path: "/", Expires: appCookie.ExpiredTime}
         http.SetCookie(writer, &cookie)
@@ -135,7 +134,7 @@ func readAppCookie(request *http.Request, cookieName string) (*AppCookie, error)
     if err != nil {
         return nil, err
     }
-    decrypted := aesDecrypt(cookie.Value, AESCipherKey)
+    decrypted := gokits.AESDecrypt(cookie.Value, AESCipherKey)
     if 0 == len(decrypted) {
         return nil, errors.New("cookie解密失败")
     }
@@ -157,8 +156,8 @@ const AppUsernameAttrKey = "app-username"
 
 func authAppUser(handlerFunc http.HandlerFunc) http.HandlerFunc {
     return func(writer http.ResponseWriter, request *http.Request) {
-        bytes, _ := ioutil.ReadAll(request.Body)
-        loginReq, ok := gokits.UnJson(string(bytes),
+        body, _ := gokits.RequestBody(request)
+        loginReq, ok := gokits.UnJson(body,
             new(AppDoLoginReq)).(*AppDoLoginReq)
         if !ok || nil == loginReq {
             gokits.ResponseJson(writer,
@@ -243,7 +242,7 @@ func authAppUser(handlerFunc http.HandlerFunc) http.HandlerFunc {
             if !ok || nil == userInfo {
                 return errors.New("用户数据解析失败")
             }
-            if userInfo.Password != hmacSha256Base64(loginReq.Password, PasswordKey) {
+            if userInfo.Password != gokits.HmacSha256Base64(loginReq.Password, PasswordKey) {
                 return errors.New("用户名密码不匹配")
             }
 
@@ -261,10 +260,10 @@ func authAppUser(handlerFunc http.HandlerFunc) http.HandlerFunc {
             return
         }
 
-        modelCtx := modelContext(request.Context())
-        modelCtx.model[AppInfoAttrKey] = appInfo
-        modelCtx.model[RedirectUrlAttrKey] = appCookie.RedirectUrl
-        modelCtx.model[AppUsernameAttrKey] = loginReq.Username
+        modelCtx := gokits.ModelContext(request.Context())
+        modelCtx.Model[AppInfoAttrKey] = appInfo
+        modelCtx.Model[RedirectUrlAttrKey] = appCookie.RedirectUrl
+        modelCtx.Model[AppUsernameAttrKey] = loginReq.Username
         handlerFunc(writer, request.WithContext(modelCtx))
     }
 }
@@ -282,7 +281,7 @@ func readAppUserCookie(request *http.Request,
     if err != nil {
         return nil, err
     }
-    decrypted := aesDecrypt(cookie.Value, encryptKey)
+    decrypted := gokits.AESDecrypt(cookie.Value, encryptKey)
     if 0 == len(decrypted) {
         return nil, errors.New("cookie解密失败")
     }
@@ -349,7 +348,7 @@ func serveAppUserDoLogin(writer http.ResponseWriter, request *http.Request) {
         Random:      randomCookieField(),
         ExpiredTime: time.Now().Add(time.Hour * time.Duration(appConfig.CookieExpiredHours)),
     }
-    cookieValue := aesEncrypt(gokits.Json(appUserCookie), appInfo.EncryptKey)
+    cookieValue := gokits.AESEncrypt(gokits.Json(appUserCookie), appInfo.EncryptKey)
     cookie := http.Cookie{Name: appInfo.CookieName,
         Value: cookieValue, Path: "/", Expires: appUserCookie.ExpiredTime}
     if 0 != len(appInfo.CookieDomain) {
@@ -372,8 +371,8 @@ type AppUserRegisterReq struct {
 }
 
 func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
-    bytes, _ := ioutil.ReadAll(request.Body)
-    registerReq, ok := gokits.UnJson(string(bytes),
+    body, _ := gokits.RequestBody(request)
+    registerReq, ok := gokits.UnJson(body,
         new(AppUserRegisterReq)).(*AppUserRegisterReq)
     if !ok || nil == registerReq {
         gokits.ResponseJson(writer,
@@ -448,7 +447,7 @@ func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
         }
         newUser := UserInfo{
             Username:   registerReq.Username,
-            Password:   hmacSha256Base64(registerReq.Password, PasswordKey),
+            Password:   gokits.HmacSha256Base64(registerReq.Password, PasswordKey),
             CreateTime: JsonableTime(time.Now()),
             UpdateTime: JsonableTime(time.Now()),
         }
@@ -479,8 +478,8 @@ type AppUserChangePasswordReq struct {
 }
 
 func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Request) {
-    bytes, _ := ioutil.ReadAll(request.Body)
-    changeReq, ok := gokits.UnJson(string(bytes),
+    body, _ := gokits.RequestBody(request)
+    changeReq, ok := gokits.UnJson(body,
         new(AppUserChangePasswordReq)).(*AppUserChangePasswordReq)
     if !ok || nil == changeReq {
         gokits.ResponseJson(writer,
@@ -563,11 +562,11 @@ func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Requ
         if !ok || nil == userInfo {
             return errors.New("用户数据解析失败")
         }
-        if userInfo.Password != hmacSha256Base64(changeReq.OldPassword, PasswordKey) {
+        if userInfo.Password != gokits.HmacSha256Base64(changeReq.OldPassword, PasswordKey) {
             return errors.New("用户名密码不匹配")
         }
 
-        userInfo.Password = hmacSha256Base64(changeReq.NewPassword, PasswordKey)
+        userInfo.Password = gokits.HmacSha256Base64(changeReq.NewPassword, PasswordKey)
         userInfo.UpdateTime = JsonableTime(time.Now())
         return bucket.Put([]byte(changeReq.Username),
             []byte(gokits.Json(userInfo)))

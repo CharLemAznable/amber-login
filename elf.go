@@ -2,22 +2,20 @@ package main
 
 import (
     "bytes"
-    "compress/gzip"
-    "context"
-    "fmt"
     "github.com/CharLemAznable/gokits"
-    "github.com/tdewolff/minify"
-    "github.com/tdewolff/minify/css"
-    "github.com/tdewolff/minify/html"
-    "github.com/tdewolff/minify/js"
+    "github.com/averagesecurityguy/random"
     "io"
     "mime"
     "net/http"
-    "net/http/httputil"
     "path/filepath"
     "strings"
     "time"
 )
+
+func randomCookieField() string {
+    s, _ := random.AlphaNum(16)
+    return s
+}
 
 type JsonableTime time.Time
 
@@ -37,50 +35,11 @@ func (t *JsonableTime) UnmarshalJSON(b []byte) error {
     return err
 }
 
-func dumpRequest(handlerFunc http.HandlerFunc) http.HandlerFunc {
-    return func(writer http.ResponseWriter, request *http.Request) {
-        // Save a copy of this request for debugging.
-        requestDump, err := httputil.DumpRequest(request, true)
-        if err != nil {
-            _ = gokits.LOG.Error(err)
-        }
-        gokits.LOG.Debug(string(requestDump))
-        handlerFunc(writer, request)
-    }
-}
-
-type GzipResponseWriter struct {
-    io.Writer
-    http.ResponseWriter
-}
-
-func (w GzipResponseWriter) Write(b []byte) (int, error) {
-    return w.Writer.Write(b)
-}
-
-func gzipHandlerFunc(handlerFunc http.HandlerFunc) http.HandlerFunc {
-    return func(writer http.ResponseWriter, request *http.Request) {
-        if !strings.Contains(request.Header.Get("Accept-Encoding"), "gzip") {
-            handlerFunc(writer, request)
-            return
-        }
-        writer.Header().Set("Content-Encoding", "gzip")
-        gz := gzip.NewWriter(writer)
-        defer func() { _ = gz.Close() }()
-        gzr := GzipResponseWriter{Writer: gz, ResponseWriter: writer}
-        handlerFunc(gzr, request)
-    }
-}
-
 func detectContentType(name string) (t string) {
     if t = mime.TypeByExtension(filepath.Ext(name)); t == "" {
         t = "application/octet-stream"
     }
     return
-}
-
-func isAjaxRequest(request *http.Request) bool {
-    return "XMLHttpRequest" == request.Header.Get("X-Requested-With")
 }
 
 func serveFavicon(path string) http.HandlerFunc {
@@ -109,9 +68,9 @@ func serveResources(prefix string) http.HandlerFunc {
 
         fileContent := string(MustAsset(filename))
         if strings.HasSuffix(filename, ".js") {
-            fileContent = minifyJs(fileContent, appConfig.DevMode)
+            fileContent = gokits.MinifyJs(fileContent, appConfig.DevMode)
         } else if strings.HasSuffix(filename, ".css") {
-            fileContent = minifyCSS(fileContent, appConfig.DevMode)
+            fileContent = gokits.MinifyCSS(fileContent, appConfig.DevMode)
         }
         fileContent = strings.Replace(fileContent, "${contextPath}", appConfig.ContextPath, -1)
         buffer := bytes.NewReader([]byte(fileContent))
@@ -122,59 +81,14 @@ func serveResources(prefix string) http.HandlerFunc {
     }
 }
 
-type modelCtx struct {
-    context.Context
-    model map[string]interface{}
-}
-
-func (m *modelCtx) String() string {
-    return fmt.Sprintf("%v.WithModel(%#v)", m.Context, gokits.Json(m.model))
-}
-
-func (m *modelCtx) Value(key interface{}) interface{} {
-    keyStr, ok := key.(string)
-    if !ok {
-        return m.Context.Value(key)
-    }
-    value, ok := m.model[keyStr]
-    if !ok {
-        return m.Context.Value(key)
-    }
-    return value
-}
-
-func modelContext(parent context.Context) *modelCtx {
-    switch parent.(type) {
-    case *modelCtx:
-        return parent.(*modelCtx)
-    default:
-        return &modelCtx{parent, map[string]interface{}{}}
-    }
-}
-
-func modelContextWithValue(parent context.Context, key string, val interface{}) context.Context {
-    if "" == key {
-        panic("empty key")
-    }
-    modelCtx := modelContext(parent)
-    modelCtx.model[key] = val
-    return modelCtx
-}
-
-func serveModelContext(handlerFunc http.HandlerFunc) http.HandlerFunc {
-    return func(writer http.ResponseWriter, request *http.Request) {
-        handlerFunc(writer, request.WithContext(modelContext(request.Context())))
-    }
-}
-
 func serveHtmlPage(htmlName string) http.HandlerFunc {
     return func(writer http.ResponseWriter, request *http.Request) {
         htmlContent := string(MustAsset(htmlName + ".html"))
-        htmlContent = minifyHTML(htmlContent, appConfig.DevMode)
+        htmlContent = gokits.MinifyHTML(htmlContent, appConfig.DevMode)
         htmlContent = strings.Replace(htmlContent, "${contextPath}", appConfig.ContextPath, -1)
 
-        modelCtx := modelContext(request.Context())
-        for key, value := range modelCtx.model {
+        modelCtx := gokits.ModelContext(request.Context())
+        for key, value := range modelCtx.Model {
             valueStr, ok := value.(string)
             if !ok {
                 valueStr = gokits.Json(value)
@@ -184,72 +98,4 @@ func serveHtmlPage(htmlName string) http.HandlerFunc {
 
         gokits.ResponseHtml(writer, htmlContent)
     }
-}
-
-func serveRedirect(redirect string) http.HandlerFunc {
-    return func(writer http.ResponseWriter, request *http.Request) {
-        http.Redirect(writer, request, gokits.PathJoin(appConfig.ContextPath, redirect), http.StatusFound)
-    }
-}
-
-func servePost(handlerFunc http.HandlerFunc) http.HandlerFunc {
-    return func(writer http.ResponseWriter, request *http.Request) {
-        if http.MethodPost != request.Method {
-            writer.WriteHeader(http.StatusNotFound)
-            return
-        }
-        handlerFunc(writer, request)
-    }
-}
-
-func serveAjax(handlerFunc http.HandlerFunc) http.HandlerFunc {
-    return func(writer http.ResponseWriter, request *http.Request) {
-        if !isAjaxRequest(request) {
-            writer.WriteHeader(http.StatusNotFound)
-            return
-        }
-        handlerFunc(writer, request)
-    }
-}
-
-func minifyHTML(htmlString string, devMode bool) string {
-    if devMode {
-        return htmlString
-    }
-
-    mini := minify.New()
-    mini.AddFunc("text/html", html.Minify)
-    minified, _ := mini.String("text/html", htmlString)
-    return minified
-}
-
-func minifyCSS(cssString string, devMode bool) string {
-    if devMode {
-        return cssString
-    }
-
-    mini := minify.New()
-    mini.AddFunc("text/css", css.Minify)
-
-    minifiedCSS, err := mini.String("text/css", cssString)
-    if err != nil {
-        fmt.Println("mini css:", err.Error())
-    }
-
-    return minifiedCSS
-}
-
-func minifyJs(jsString string, devMode bool) string {
-    if devMode {
-        return jsString
-    }
-
-    mini := minify.New()
-    mini.AddFunc("text/javascript", js.Minify)
-    minifiedJs, err := mini.String("text/javascript", jsString)
-    if err != nil {
-        fmt.Println("mini js:", err.Error())
-    }
-
-    return minifiedJs
 }

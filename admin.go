@@ -5,7 +5,6 @@ import (
     "github.com/CharLemAznable/gokits"
     "github.com/mojocn/base64Captcha"
     "go.etcd.io/bbolt"
-    "io/ioutil"
     "net/http"
     "time"
 )
@@ -24,7 +23,7 @@ func readAdminCookie(request *http.Request) (*AdminCookie, error) {
     if err != nil {
         return nil, err
     }
-    decrypted := aesDecrypt(cookie.Value, AESCipherKey)
+    decrypted := gokits.AESDecrypt(cookie.Value, AESCipherKey)
     if 0 == len(decrypted) {
         return nil, errors.New("cookie解密失败")
     }
@@ -45,8 +44,8 @@ func authAdmin(handlerFunc http.HandlerFunc) http.HandlerFunc {
     return func(writer http.ResponseWriter, request *http.Request) {
         adminCookie, err := readAdminCookie(request)
         if err == nil && adminCookie.Username != "" {
-            modelCtx := modelContextWithValue(request.Context(),
-                AdminUsernameAttrKey, adminCookie.Username)
+            modelCtx := gokits.ModelContextWithValue(
+                request.Context(), AdminUsernameAttrKey, adminCookie.Username)
             // 执行被装饰的函数
             handlerFunc(writer, request.WithContext(modelCtx))
             return
@@ -57,12 +56,12 @@ func authAdmin(handlerFunc http.HandlerFunc) http.HandlerFunc {
             ExpiredTime: time.Now().Add(time.Hour * 24),
             Redirect:    request.RequestURI, // include contextPath prefix
         }
-        cookieValue := aesEncrypt(gokits.Json(tempCookie), AESCipherKey)
+        cookieValue := gokits.AESEncrypt(gokits.Json(tempCookie), AESCipherKey)
         cookie := http.Cookie{Name: AdminCookieName,
             Value: cookieValue, Path: "/", Expires: tempCookie.ExpiredTime}
         http.SetCookie(writer, &cookie)
 
-        if isAjaxRequest(request) {
+        if gokits.IsAjaxRequest(request) {
             gokits.ResponseJson(writer, gokits.Json(map[string]string{"msg": "未登录",
                 "redirect": gokits.PathJoin(appConfig.ContextPath, "/admin/login")}))
         } else {
@@ -80,8 +79,8 @@ type AdminLoginReq struct {
 }
 
 func serveAdminDoLogin(writer http.ResponseWriter, request *http.Request) {
-    bytes, _ := ioutil.ReadAll(request.Body)
-    loginReq, ok := gokits.UnJson(string(bytes),
+    body, _ := gokits.RequestBody(request)
+    loginReq, ok := gokits.UnJson(body,
         new(AdminLoginReq)).(*AdminLoginReq)
     if !ok || nil == loginReq {
         gokits.ResponseJson(writer,
@@ -133,7 +132,7 @@ func serveAdminDoLogin(writer http.ResponseWriter, request *http.Request) {
     err := db.View(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(AdminBucket))
         password := string(bucket.Get([]byte(loginReq.Username)))
-        if password != hmacSha256Base64(loginReq.Password, PasswordKey) {
+        if password != gokits.HmacSha256Base64(loginReq.Password, PasswordKey) {
             return errors.New("用户名密码不匹配")
         }
         return nil
@@ -155,7 +154,7 @@ func serveAdminDoLogin(writer http.ResponseWriter, request *http.Request) {
         Random:      randomCookieField(),
         ExpiredTime: time.Now().Add(time.Hour),
     }
-    cookieValue := aesEncrypt(gokits.Json(adminCookie), AESCipherKey)
+    cookieValue := gokits.AESEncrypt(gokits.Json(adminCookie), AESCipherKey)
     cookie := http.Cookie{Name: AdminCookieName,
         Value: cookieValue, Path: "/", Expires: adminCookie.ExpiredTime}
     http.SetCookie(writer, &cookie)
@@ -171,8 +170,8 @@ type AdminChangePasswordReq struct {
 }
 
 func serveAdminChangePassword(writer http.ResponseWriter, request *http.Request) {
-    bytes, _ := ioutil.ReadAll(request.Body)
-    changeReq, ok := gokits.UnJson(string(bytes),
+    body, _ := gokits.RequestBody(request)
+    changeReq, ok := gokits.UnJson(body,
         new(AdminChangePasswordReq)).(*AdminChangePasswordReq)
     if !ok || nil == changeReq {
         gokits.ResponseJson(writer,
@@ -209,11 +208,11 @@ func serveAdminChangePassword(writer http.ResponseWriter, request *http.Request)
     err := db.Update(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(AdminBucket))
         password := string(bucket.Get([]byte(username)))
-        if password != hmacSha256Base64(changeReq.OldPassword, PasswordKey) {
+        if password != gokits.HmacSha256Base64(changeReq.OldPassword, PasswordKey) {
             return errors.New("用户名密码不匹配")
         }
         return bucket.Put([]byte(username),
-            []byte(hmacSha256Base64(changeReq.NewPassword, PasswordKey)))
+            []byte(gokits.HmacSha256Base64(changeReq.NewPassword, PasswordKey)))
     })
     if err != nil {
         gokits.ResponseJson(writer,
@@ -231,7 +230,7 @@ func serveAdminDoLogout(writer http.ResponseWriter, _ *http.Request) {
         ExpiredTime: time.Now().Add(time.Hour * 24),
         Redirect:    gokits.PathJoin(appConfig.ContextPath, "/admin/index"),
     }
-    cookieValue := aesEncrypt(gokits.Json(tempCookie), AESCipherKey)
+    cookieValue := gokits.AESEncrypt(gokits.Json(tempCookie), AESCipherKey)
     cookie := http.Cookie{Name: AdminCookieName,
         Value: cookieValue, Path: "/", Expires: tempCookie.ExpiredTime}
     http.SetCookie(writer, &cookie)
@@ -247,7 +246,7 @@ func authAdminAdmin(handlerFunc http.HandlerFunc) http.HandlerFunc {
             return
         }
 
-        if isAjaxRequest(request) {
+        if gokits.IsAjaxRequest(request) {
             gokits.ResponseJson(writer, gokits.Json(map[string]string{"msg": "无权限",
                 "redirect": gokits.PathJoin(appConfig.ContextPath, "/admin/index")}))
         } else {
@@ -263,8 +262,8 @@ type AdminSubmitAdminReq struct {
 }
 
 func serveAdminSubmitAdmin(writer http.ResponseWriter, request *http.Request) {
-    bytes, _ := ioutil.ReadAll(request.Body)
-    req, ok := gokits.UnJson(string(bytes),
+    body, _ := gokits.RequestBody(request)
+    req, ok := gokits.UnJson(body,
         new(AdminSubmitAdminReq)).(*AdminSubmitAdminReq)
     if !ok || nil == req {
         gokits.ResponseJson(writer,
@@ -294,7 +293,7 @@ func serveAdminSubmitAdmin(writer http.ResponseWriter, request *http.Request) {
             return errors.New("管理员不存在")
         }
         return bucket.Put([]byte(req.ManageName),
-            []byte(hmacSha256Base64(req.ManagePass, PasswordKey)))
+            []byte(gokits.HmacSha256Base64(req.ManagePass, PasswordKey)))
     })
     if err != nil {
         gokits.ResponseJson(writer,

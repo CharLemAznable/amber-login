@@ -4,7 +4,6 @@ import (
     "errors"
     "github.com/CharLemAznable/gokits"
     "go.etcd.io/bbolt"
-    "io/ioutil"
     "net/http"
 )
 
@@ -87,8 +86,8 @@ type AppSubmitReq struct {
 }
 
 func serveAdminSubmitApp(writer http.ResponseWriter, request *http.Request) {
-    bytes, _ := ioutil.ReadAll(request.Body)
-    submitReq, ok := gokits.UnJson(string(bytes),
+    body, _ := gokits.RequestBody(request)
+    submitReq, ok := gokits.UnJson(body,
         new(AppSubmitReq)).(*AppSubmitReq)
     if !ok || nil == submitReq {
         gokits.ResponseJson(writer,
@@ -148,8 +147,8 @@ func serveAdminSubmitApp(writer http.ResponseWriter, request *http.Request) {
 }
 
 func serveAdminDeleteApp(writer http.ResponseWriter, request *http.Request) {
-    bytes, _ := ioutil.ReadAll(request.Body)
-    submitReq, ok := gokits.UnJson(string(bytes),
+    body, _ := gokits.RequestBody(request)
+    submitReq, ok := gokits.UnJson(body,
         new(AppSubmitReq)).(*AppSubmitReq)
     if !ok || nil == submitReq {
         gokits.ResponseJson(writer,

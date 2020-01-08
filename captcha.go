@@ -27,9 +27,9 @@ func serveCaptcha(handlerFunc http.HandlerFunc) http.HandlerFunc {
         captchaInBase64 := base64Captcha.CaptchaWriteToBase64Encoding(captcha)
         captchaCache.Add(idKey, time.Minute*5, idKey) // cache 5 minutes
 
-        modelCtx := modelContext(request.Context())
-        modelCtx.model["captcha-id"] = idKey
-        modelCtx.model["captcha"] = captchaInBase64
+        modelCtx := gokits.ModelContext(request.Context())
+        modelCtx.Model["captcha-id"] = idKey
+        modelCtx.Model["captcha"] = captchaInBase64
         // 执行被装饰的函数
         handlerFunc(writer, request.WithContext(modelCtx))
     }

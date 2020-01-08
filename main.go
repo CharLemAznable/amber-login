@@ -1,7 +1,7 @@
 package main
 
 import (
-    "github.com/CharLemAznable/gokits"
+    . "github.com/CharLemAznable/gokits"
     "golang.org/x/net/websocket"
     "net/http"
 )
@@ -10,97 +10,86 @@ func main() {
     mux := http.NewServeMux()
 
     // resources
-    handleFunc(mux, "/favicon.ico",
-        serveFavicon("favicon.ico"), false)
-    handleFunc(mux, "/res/",
-        serveResources("/res/"), false)
+    HandleFunc(mux, "/favicon.ico",
+        serveFavicon("favicon.ico"), DumpRequestDisabled)
+    HandleFunc(mux, "/res/",
+        serveResources("/res/"), DumpRequestDisabled)
 
     // admin login
-    handleFunc(mux, "/admin/login",
-        serveCaptcha(serveHtmlPage("admin/login")), true)
-    handleFunc(mux, "/admin/do-login",
-        servePost(serveAjax(serveAdminDoLogin)), false)
-    handleFunc(mux, "/admin",
-        serveRedirect("/admin/index"), false)
-    handleFunc(mux, "/admin/index",
-        authAdmin(serveHtmlPage("admin/index")), true)
-    handleFunc(mux, "/admin/change-password",
-        servePost(serveAjax(authAdmin(serveAdminChangePassword))), false)
-    handleFunc(mux, "/admin/do-logout",
-        servePost(serveAjax(serveAdminDoLogout)), false)
+    HandleFunc(mux, "/admin/login",
+        serveCaptcha(serveHtmlPage("admin/login")))
+    HandleFunc(mux, "/admin/do-login",
+        ServePost(ServeAjax(serveAdminDoLogin)), DumpRequestDisabled)
+    HandleFunc(mux, "/admin",
+        ServeRedirect(PathJoin(appConfig.ContextPath, "/admin/index")), DumpRequestDisabled)
+    HandleFunc(mux, "/admin/index",
+        authAdmin(serveHtmlPage("admin/index")))
+    HandleFunc(mux, "/admin/change-password",
+        ServePost(ServeAjax(authAdmin(serveAdminChangePassword))), DumpRequestDisabled)
+    HandleFunc(mux, "/admin/do-logout",
+        ServePost(ServeAjax(serveAdminDoLogout)), DumpRequestDisabled)
 
     // admin administrator
-    handleFunc(mux, "/admin/admin",
-        authAdminAdmin(serveHtmlPage("admin/admin")), true)
-    handleFunc(mux, "/admin/submit-admin",
-        servePost(serveAjax(authAdminAdmin(serveAdminSubmitAdmin))), false)
+    HandleFunc(mux, "/admin/admin",
+        authAdminAdmin(serveHtmlPage("admin/admin")))
+    HandleFunc(mux, "/admin/submit-admin",
+        ServePost(ServeAjax(authAdminAdmin(serveAdminSubmitAdmin))), DumpRequestDisabled)
 
     // admin apps
-    handleFunc(mux, "/admin/apps",
-        authAdmin(serveHtmlPage("admin/apps")), true)
-    handleFunc(mux, "/admin/query-apps",
-        serveAjax(authAdmin(serveAdminQueryApps)), true)
-    handleFunc(mux, "/admin/query-app",
-        serveAjax(authAdmin(serveAdminQueryApp)), true)
-    handleFunc(mux, "/admin/submit-app",
-        servePost(serveAjax(authAdmin(serveAdminSubmitApp))), true)
-    handleFunc(mux, "/admin/delete-app",
-        servePost(serveAjax(authAdmin(serveAdminDeleteApp))), true)
+    HandleFunc(mux, "/admin/apps",
+        authAdmin(serveHtmlPage("admin/apps")))
+    HandleFunc(mux, "/admin/query-apps",
+        ServeAjax(authAdmin(serveAdminQueryApps)))
+    HandleFunc(mux, "/admin/query-app",
+        ServeAjax(authAdmin(serveAdminQueryApp)))
+    HandleFunc(mux, "/admin/submit-app",
+        ServePost(ServeAjax(authAdmin(serveAdminSubmitApp))))
+    HandleFunc(mux, "/admin/delete-app",
+        ServePost(ServeAjax(authAdmin(serveAdminDeleteApp))))
 
     // admin users
-    handleFunc(mux, "/admin/users",
-        authAdmin(serveHtmlPage("admin/users")), true)
-    handleFunc(mux, "/admin/query-users",
-        serveAjax(authAdmin(serveAdminQueryUsers)), true)
-    handleFunc(mux, "/admin/query-app-transfers",
-        serveAjax(authAdmin(serveAdminQueryAppTransfers)), true)
-    handleFunc(mux, "/admin/set-user-privileges",
-        servePost(serveAjax(authAdmin(serveAdminSetUserPrivileges))), true)
-    handleFunc(mux, "/admin/reset-user-password",
-        servePost(serveAjax(authAdmin(serveAdminResetUserPassword))), false)
-    handleFunc(mux, "/admin/switch-toggle-user",
-        servePost(serveAjax(authAdmin(serveAdminSwitchToggleUser))), true)
-    handleFunc(mux, "/admin/delete-user",
-        servePost(serveAjax(authAdmin(serveAdminDeleteUser))), true)
-    mux.Handle(gokits.PathJoin(appConfig.ContextPath, "/admin/users/websocket"),
+    HandleFunc(mux, "/admin/users",
+        authAdmin(serveHtmlPage("admin/users")))
+    HandleFunc(mux, "/admin/query-users",
+        ServeAjax(authAdmin(serveAdminQueryUsers)))
+    HandleFunc(mux, "/admin/query-app-transfers",
+        ServeAjax(authAdmin(serveAdminQueryAppTransfers)))
+    HandleFunc(mux, "/admin/set-user-privileges",
+        ServePost(ServeAjax(authAdmin(serveAdminSetUserPrivileges))))
+    HandleFunc(mux, "/admin/reset-user-password",
+        ServePost(ServeAjax(authAdmin(serveAdminResetUserPassword))), DumpRequestDisabled)
+    HandleFunc(mux, "/admin/switch-toggle-user",
+        ServePost(ServeAjax(authAdmin(serveAdminSwitchToggleUser))))
+    HandleFunc(mux, "/admin/delete-user",
+        ServePost(ServeAjax(authAdmin(serveAdminDeleteUser))))
+    mux.Handle(PathJoin(appConfig.ContextPath, "/admin/users/websocket"),
         websocket.Handler(serveAdminUsersSocket))
 
     // admin logs
-    handleFunc(mux, "/admin/logs",
-        authAdmin(serveHtmlPage("admin/logs")), true)
-    handleFunc(mux, "/admin/query-logs",
-        serveAjax(authAdmin(serveAdminQueryUserLoginLogs)), true)
+    HandleFunc(mux, "/admin/logs",
+        authAdmin(serveHtmlPage("admin/logs")))
+    HandleFunc(mux, "/admin/query-logs",
+        ServeAjax(authAdmin(serveAdminQueryUserLoginLogs)))
 
     // user login/register/change-password
-    handleFunc(mux, "/",
-        serveCaptcha(serveAppCookie(serveHtmlPage("login"))), true)
-    handleFunc(mux, "/do-login",
-        servePost(serveAjax(authAppUser(serveAppUserDoLogin))), false)
-    handleFunc(mux, "/register",
-        serveCaptcha(serveHtmlPage("register")), true)
-    handleFunc(mux, "/do-register",
-        servePost(serveAjax(serveAppUserDoRegister)), false)
-    handleFunc(mux, "/change-password",
-        serveCaptcha(serveHtmlPage("change-password")), true)
-    handleFunc(mux, "/do-change-password",
-        servePost(serveAjax(serveAppUserDoChangePassword)), false)
+    HandleFunc(mux, "/",
+        serveCaptcha(serveAppCookie(serveHtmlPage("login"))))
+    HandleFunc(mux, "/do-login",
+        ServePost(ServeAjax(authAppUser(serveAppUserDoLogin))), DumpRequestDisabled)
+    HandleFunc(mux, "/register",
+        serveCaptcha(serveHtmlPage("register")))
+    HandleFunc(mux, "/do-register",
+        ServePost(ServeAjax(serveAppUserDoRegister)), DumpRequestDisabled)
+    HandleFunc(mux, "/change-password",
+        serveCaptcha(serveHtmlPage("change-password")))
+    HandleFunc(mux, "/do-change-password",
+        ServePost(ServeAjax(serveAppUserDoChangePassword)), DumpRequestDisabled)
 
-    handleFunc(mux, "/test",
-        authTest(serveHtmlPage("test")), true)
+    HandleFunc(mux, "/test",
+        authTest(serveHtmlPage("test")))
 
-    server := http.Server{Addr: ":" + gokits.StrFromInt(appConfig.Port), Handler: mux}
+    server := http.Server{Addr: ":" + StrFromInt(appConfig.Port), Handler: mux}
     if err := server.ListenAndServe(); err != nil {
-        gokits.LOG.Crashf("Start server Error: %s", err.Error())
+        LOG.Crashf("Start server Error: %s", err.Error())
     }
-}
-
-func handleFunc(mux *http.ServeMux, path string, handlerFunc http.HandlerFunc, requiredDump bool) {
-    wrap := handlerFunc
-    if requiredDump {
-        wrap = dumpRequest(handlerFunc)
-    }
-
-    wrap = gzipHandlerFunc(wrap)
-    handlePath := gokits.PathJoin(appConfig.ContextPath, path)
-    mux.HandleFunc(handlePath, serveModelContext(wrap))
 }

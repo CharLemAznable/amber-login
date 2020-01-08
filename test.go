@@ -24,7 +24,7 @@ func readTestCookie(request *http.Request) (*TestCookie, error) {
     if err != nil {
         return nil, err
     }
-    decrypted := aesDecrypt(cookie.Value, TestEncryptKey)
+    decrypted := gokits.AESDecrypt(cookie.Value, TestEncryptKey)
     if 0 == len(decrypted) {
         return nil, errors.New("cookie解密失败")
     }

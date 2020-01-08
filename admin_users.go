@@ -5,7 +5,6 @@ import (
     "github.com/CharLemAznable/gokits"
     "go.etcd.io/bbolt"
     "golang.org/x/net/websocket"
-    "io/ioutil"
     "net/http"
     "strings"
     "sync"
@@ -88,8 +87,8 @@ type UserSubmitReq struct {
 }
 
 func serveAdminSetUserPrivileges(writer http.ResponseWriter, request *http.Request) {
-    bytes, _ := ioutil.ReadAll(request.Body)
-    submitReq, ok := gokits.UnJson(string(bytes),
+    body, _ := gokits.RequestBody(request)
+    submitReq, ok := gokits.UnJson(body,
         new(UserSubmitReq)).(*UserSubmitReq)
     if !ok || nil == submitReq {
         gokits.ResponseJson(writer,
@@ -128,8 +127,8 @@ func serveAdminSetUserPrivileges(writer http.ResponseWriter, request *http.Reque
 }
 
 func serveAdminResetUserPassword(writer http.ResponseWriter, request *http.Request) {
-    bytes, _ := ioutil.ReadAll(request.Body)
-    submitReq, ok := gokits.UnJson(string(bytes),
+    body, _ := gokits.RequestBody(request)
+    submitReq, ok := gokits.UnJson(body,
         new(UserSubmitReq)).(*UserSubmitReq)
     if !ok || nil == submitReq {
         gokits.ResponseJson(writer,
@@ -166,7 +165,7 @@ func serveAdminResetUserPassword(writer http.ResponseWriter, request *http.Reque
         if !ok || nil == userInfo {
             return errors.New("用户数据解析失败")
         }
-        userInfo.Password = hmacSha256Base64(submitReq.Password, PasswordKey)
+        userInfo.Password = gokits.HmacSha256Base64(submitReq.Password, PasswordKey)
         userInfo.UpdateTime = JsonableTime(time.Now())
         return bucket.Put([]byte(submitReq.Username),
             []byte(gokits.Json(userInfo)))
@@ -182,8 +181,8 @@ func serveAdminResetUserPassword(writer http.ResponseWriter, request *http.Reque
 }
 
 func serveAdminSwitchToggleUser(writer http.ResponseWriter, request *http.Request) {
-    bytes, _ := ioutil.ReadAll(request.Body)
-    submitReq, ok := gokits.UnJson(string(bytes),
+    body, _ := gokits.RequestBody(request)
+    submitReq, ok := gokits.UnJson(body,
         new(UserSubmitReq)).(*UserSubmitReq)
     if !ok || nil == submitReq {
         gokits.ResponseJson(writer,
@@ -223,8 +222,8 @@ func serveAdminSwitchToggleUser(writer http.ResponseWriter, request *http.Reques
 }
 
 func serveAdminDeleteUser(writer http.ResponseWriter, request *http.Request) {
-    bytes, _ := ioutil.ReadAll(request.Body)
-    submitReq, ok := gokits.UnJson(string(bytes),
+    body, _ := gokits.RequestBody(request)
+    submitReq, ok := gokits.UnJson(body,
         new(UserSubmitReq)).(*UserSubmitReq)
     if !ok || nil == submitReq {
         gokits.ResponseJson(writer,
@@ -279,7 +278,7 @@ func readAdminSocketCookie(ws *websocket.Conn) (*AdminCookie, error) {
             cookieValue = cookie[len(AdminCookieName+"="):]
         }
     }
-    decrypted := aesDecrypt(cookieValue, AESCipherKey)
+    decrypted := gokits.AESDecrypt(cookieValue, AESCipherKey)
     if 0 == len(decrypted) {
         return nil, errors.New("注册信息解密失败")
     }

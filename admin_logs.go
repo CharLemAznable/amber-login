@@ -15,8 +15,8 @@ type UserLoginLog struct {
 }
 
 func serveAdminQueryUserLoginLogs(writer http.ResponseWriter, request *http.Request) {
-    page := formIntValue(request, "page", 1)
-    limit := formIntValue(request, "limit", 10)
+    page := gokits.FormIntValueDefault(request, "page", 1)
+    limit := gokits.FormIntValueDefault(request, "limit", 10)
     start := gokits.Condition(limit <= 0, 0, (page-1)*limit).(int)
 
     total := 0
@@ -56,14 +56,6 @@ func serveAdminQueryUserLoginLogs(writer http.ResponseWriter, request *http.Requ
         gokits.Json(map[string]interface{}{
             "code": 0, "msg": "OK",
             "count": total, "data": logArray}))
-}
-
-func formIntValue(request *http.Request, key string, defaultValue int) int {
-    formValue := request.FormValue(key)
-    if intValue, err := gokits.IntFromStr(formValue); nil == err {
-        return intValue
-    }
-    return defaultValue
 }
 
 func pagingForLoopIncrease(cursor *bbolt.Cursor, i int) ([]byte, []byte, int) {
