@@ -23,3 +23,21 @@ func TestJsonableTime(t *testing.T) {
         t.Errorf("Should Equal")
     }
 }
+
+func TestDetectContentType(t *testing.T) {
+    if "application/javascript" != detectContentType("a.js") {
+        t.Errorf("Should be application/javascript")
+    }
+    if "text/css; charset=utf-8" != detectContentType("a.css") {
+        t.Errorf("Should be text/css; charset=utf-8")
+    }
+    if "text/html; charset=utf-8" != detectContentType("a.html") {
+        t.Errorf("Should be text/html; charset=utf-8")
+    }
+    if "image/x-icon" != detectContentType("a.ico") {
+        t.Errorf("Should be image/x-icon")
+    }
+    if "application/octet-stream" != detectContentType("a.dat") {
+        t.Errorf("Should be application/octet-stream")
+    }
+}
