@@ -7,24 +7,26 @@ import (
     "time"
 )
 
-var captchaConfig base64Captcha.ConfigDigit
+var captchaDriver *base64Captcha.DriverDigit
+var captchaInstance *base64Captcha.Captcha
 var captchaCache *gokits.CacheTable
 
 func init() {
-    captchaConfig = base64Captcha.ConfigDigit{
-        Height:     114,
-        Width:      240,
-        MaxSkew:    0.7,
-        DotCount:   80,
-        CaptchaLen: 5,
+    captchaDriver = &base64Captcha.DriverDigit{
+        Height:   114,
+        Width:    240,
+        Length:   5,
+        MaxSkew:  0.7,
+        DotCount: 80,
     }
+    captchaInstance = base64Captcha.NewCaptcha(
+        captchaDriver, base64Captcha.DefaultMemStore)
     captchaCache = gokits.CacheExpireAfterWrite("captchaCache")
 }
 
 func serveCaptcha(handlerFunc http.HandlerFunc) http.HandlerFunc {
     return func(writer http.ResponseWriter, request *http.Request) {
-        idKey, captcha := base64Captcha.GenerateCaptcha("", captchaConfig)
-        captchaInBase64 := base64Captcha.CaptchaWriteToBase64Encoding(captcha)
+        idKey, captchaInBase64, _ := captchaInstance.Generate()
         captchaCache.Add(idKey, time.Minute*5, idKey) // cache 5 minutes
 
         modelCtx := gokits.ModelContext(request.Context())

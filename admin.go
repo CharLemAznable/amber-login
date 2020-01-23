@@ -3,7 +3,6 @@ package main
 import (
     "errors"
     "github.com/CharLemAznable/gokits"
-    "github.com/mojocn/base64Captcha"
     "go.etcd.io/bbolt"
     "net/http"
     "time"
@@ -120,7 +119,7 @@ func serveAdminDoLogin(writer http.ResponseWriter, request *http.Request) {
             gokits.Json(map[string]string{"msg": "验证码不存在或已过期", "refresh": "1"}))
         return
     }
-    if !base64Captcha.VerifyCaptchaAndIsClear(cacheKey, loginReq.Captcha, false) {
+    if !captchaInstance.Verify(cacheKey, loginReq.Captcha, false) {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证码错误"}))
         return

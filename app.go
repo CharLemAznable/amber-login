@@ -3,7 +3,6 @@ package main
 import (
     "errors"
     "github.com/CharLemAznable/gokits"
-    "github.com/mojocn/base64Captcha"
     "go.etcd.io/bbolt"
     "net/http"
     "regexp"
@@ -202,7 +201,7 @@ func authAppUser(handlerFunc http.HandlerFunc) http.HandlerFunc {
                 gokits.Json(map[string]string{"msg": "验证码不存在或已过期", "refresh": "1"}))
             return
         }
-        if !base64Captcha.VerifyCaptchaAndIsClear(cacheKey, loginReq.Captcha, false) {
+        if !captchaInstance.Verify(cacheKey, loginReq.Captcha, false) {
             gokits.ResponseJson(writer,
                 gokits.Json(map[string]string{"msg": "验证码错误"}))
             return
@@ -430,7 +429,7 @@ func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
             gokits.Json(map[string]string{"msg": "验证码不存在或已过期", "refresh": "1"}))
         return
     }
-    if !base64Captcha.VerifyCaptchaAndIsClear(cacheKey, registerReq.Captcha, false) {
+    if !captchaInstance.Verify(cacheKey, registerReq.Captcha, false) {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证码错误"}))
         return
@@ -542,7 +541,7 @@ func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Requ
             gokits.Json(map[string]string{"msg": "验证码不存在或已过期", "refresh": "1"}))
         return
     }
-    if !base64Captcha.VerifyCaptchaAndIsClear(cacheKey, changeReq.Captcha, false) {
+    if !captchaInstance.Verify(cacheKey, changeReq.Captcha, false) {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证码错误"}))
         return
