@@ -1,17 +1,21 @@
 @font-face {
-    font-family: 'UbuntuMono';url('../font/UbuntuMono-R.ttf')format('truetype');
+    font-family: 'UbuntuMono';
+    src: url('font/UbuntuMono-R.ttf') format('truetype');
 }
 
 @font-face {
-    font-family: 'UbuntuMono-Bord';url('../font/UbuntuMono-B.ttf')format('truetype');
+    font-family: 'UbuntuMono-Bord';
+    src: url('font/UbuntuMono-B.ttf') format('truetype');
 }
 
 @font-face {
-    font-family: 'UbuntuMono-Italic';url('../font/UbuntuMono-RI.ttf')format('truetype');
+    font-family: 'UbuntuMono-Italic';
+    src: url('font/UbuntuMono-RI.ttf') format('truetype');
 }
 
 @font-face {
-    font-family: 'UbuntuMono-Bord-Italic';url('../font/UbuntuMono-BI.ttf')format('truetype');
+    font-family: 'UbuntuMono-Bord-Italic';
+    src: url('font/UbuntuMono-BI.ttf') format('truetype');
 }
 
 body {
