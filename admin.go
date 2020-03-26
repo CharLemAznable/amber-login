@@ -23,7 +23,7 @@ func readAdminCookie(request *http.Request) (*AdminCookie, error) {
         return nil, err
     }
     decrypted := gokits.AESDecrypt(cookie.Value, AESCipherKey)
-    if 0 == len(decrypted) {
+    if "" == decrypted {
         return nil, errors.New("cookie解密失败")
     }
     adminCookie, ok := gokits.UnJson(decrypted,
@@ -86,22 +86,22 @@ func serveAdminDoLogin(writer http.ResponseWriter, request *http.Request) {
             gokits.Json(map[string]string{"msg": "请求数据异常"}))
         return
     }
-    if 0 == len(loginReq.Username) {
+    if "" == loginReq.Username {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "用户名不能为空"}))
         return
     }
-    if 0 == len(loginReq.Password) {
+    if "" == loginReq.Password {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "密码不能为空"}))
         return
     }
-    if 0 == len(loginReq.CaptchaKey) {
+    if "" == loginReq.CaptchaKey {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证密钥不能为空"}))
         return
     }
-    if 0 == len(loginReq.Captcha) {
+    if "" == loginReq.Captcha {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证码不能为空"}))
         return
@@ -114,7 +114,7 @@ func serveAdminDoLogin(writer http.ResponseWriter, request *http.Request) {
         return
     }
     cacheKey, ok := cacheKeyData.Data().(string)
-    if !ok || 0 == len(cacheKey) {
+    if !ok || "" == cacheKey {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证码不存在或已过期", "refresh": "1"}))
         return
@@ -177,17 +177,17 @@ func serveAdminChangePassword(writer http.ResponseWriter, request *http.Request)
             gokits.Json(map[string]string{"msg": "请求数据异常"}))
         return
     }
-    if 0 == len(changeReq.OldPassword) {
+    if "" == changeReq.OldPassword {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "原密码不能为空"}))
         return
     }
-    if 0 == len(changeReq.NewPassword) {
+    if "" == changeReq.NewPassword {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "新密码不能为空"}))
         return
     }
-    if 0 == len(changeReq.RenewPassword) {
+    if "" == changeReq.RenewPassword {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "确认密码不能为空"}))
         return
@@ -198,7 +198,7 @@ func serveAdminChangePassword(writer http.ResponseWriter, request *http.Request)
         return
     }
     username, ok := request.Context().Value(AdminUsernameAttrKey).(string)
-    if !ok || 0 == len(username) {
+    if !ok || "" == username {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "请求异常, 请重新登录"}))
         return
@@ -269,7 +269,7 @@ func serveAdminSubmitAdmin(writer http.ResponseWriter, request *http.Request) {
             gokits.Json(map[string]string{"msg": "请求数据异常"}))
         return
     }
-    if 0 == len(req.ManageName) {
+    if "" == req.ManageName {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "管理员用户名不能为空"}))
         return
@@ -279,7 +279,7 @@ func serveAdminSubmitAdmin(writer http.ResponseWriter, request *http.Request) {
             gokits.Json(map[string]string{"msg": "不能修改超级管理员密码"}))
         return
     }
-    if 0 == len(req.ManagePass) {
+    if "" == req.ManagePass {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "管理员密码不能为空"}))
         return
@@ -288,7 +288,7 @@ func serveAdminSubmitAdmin(writer http.ResponseWriter, request *http.Request) {
     err := db.Update(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(AdminBucket))
         password := string(bucket.Get([]byte(req.ManageName)))
-        if 0 == len(password) {
+        if "" == password {
             return errors.New("管理员不存在")
         }
         return bucket.Put([]byte(req.ManageName),

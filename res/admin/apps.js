@@ -13,8 +13,9 @@ layui.use(['jquery', 'layer', 'form'], function () {
                 return;
             }
 
-            let appsHtml = '';
-            for (let i = 0, len = res['apps'].length; i < len; i++) {
+            let appsHtml = '<div class="layui-row layui-col-space15 apps-container-row">';
+            let len = res['apps'].length;
+            for (let i = 0; i < len; i++) {
                 let app = res['apps'][i];
                 appsHtml +=
                     '<div class="layui-col-lg4 layui-col-md4 layui-col-sm4 layui-col-xs4">' +
@@ -36,9 +37,14 @@ layui.use(['jquery', 'layer', 'form'], function () {
                     '                <label>' + app['encrypt-key'] + '</label></div>' +
                     '            <div><label class="app-attr">默认地址:</label>' +
                     '                <label>' + app['default-url'] + '</label></div>' +
+                    '            <div><label class="app-attr">跨域回调地址:</label>' +
+                    '                <label>' + app['cocs-url'] + '</label></div>' +
                     '        </div>' +
                     '    </div>' +
                     '</div>';
+                if (i % 3 === 2) {
+                    appsHtml += '</div><div class="layui-row layui-col-space15 apps-container-row">';
+                }
             }
             appsHtml +=
                 '<div class="layui-col-lg4 layui-col-md4 layui-col-sm4 layui-col-xs4">' +
@@ -46,7 +52,8 @@ layui.use(['jquery', 'layer', 'form'], function () {
                 '        <i class="layui-icon">&#xe654;</i>' +
                 '    </div>' +
                 '</div>';
-            $('.apps-container-row').html(appsHtml);
+            appsHtml += '</div>';
+            $('.apps-container').html(appsHtml);
         },
         error: function () {
             layer.alert('查询失败');

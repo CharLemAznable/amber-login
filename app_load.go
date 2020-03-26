@@ -31,7 +31,7 @@ func init() {
     gokits.If(0 == appConfig.Port, func() {
         appConfig.Port = 11325
     })
-    gokits.If(0 != len(appConfig.ContextPath), func() {
+    gokits.If("" != appConfig.ContextPath, func() {
         gokits.Unless(strings.HasPrefix(appConfig.ContextPath, "/"),
             func() { appConfig.ContextPath = "/" + appConfig.ContextPath })
         gokits.If(strings.HasSuffix(appConfig.ContextPath, "/"),

@@ -5,6 +5,7 @@ import (
     "github.com/CharLemAznable/gokits"
     "go.etcd.io/bbolt"
     "net/http"
+    "net/url"
     "regexp"
     "time"
 )
@@ -15,7 +16,7 @@ import (
 
 func readRequestAppInfo(request *http.Request) (*AppInfo, error) {
     appId := request.FormValue("appId")
-    if 0 == len(appId) {
+    if "" == appId {
         return nil, errors.New("缺少参数appId")
     }
 
@@ -23,7 +24,7 @@ func readRequestAppInfo(request *http.Request) (*AppInfo, error) {
     err := db.View(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(AppBucket))
         appValue := string(bucket.Get([]byte(appId)))
-        if 0 == len(appValue) {
+        if "" == appValue {
             return errors.New("应用不存在")
         }
         _appInfo, ok := gokits.UnJson(appValue,
@@ -39,10 +40,10 @@ func readRequestAppInfo(request *http.Request) (*AppInfo, error) {
     }
 
     redirectUrl := request.FormValue("redirectUrl")
-    if 0 != len(redirectUrl) {
+    if "" != redirectUrl {
         appInfo.DefaultUrl = redirectUrl
     }
-    if 0 == len(appInfo.DefaultUrl) {
+    if "" == appInfo.DefaultUrl {
         return nil, errors.New("未指定跳转地址")
     }
     return appInfo, nil
@@ -123,7 +124,7 @@ func readAppCookie(request *http.Request, cookieName string) (*AppCookie, error)
         return nil, errors.New("cookie缓存不存在或已过期")
     }
     appCookieName, ok := appCookieNameData.Data().(string)
-    if !ok || 0 == len(appCookieName) {
+    if !ok || "" == appCookieName {
         return nil, errors.New("cookie缓存不存在或已过期")
     }
     // 获取CookieName, 清除缓存
@@ -134,7 +135,7 @@ func readAppCookie(request *http.Request, cookieName string) (*AppCookie, error)
         return nil, err
     }
     decrypted := gokits.AESDecrypt(cookie.Value, AESCipherKey)
-    if 0 == len(decrypted) {
+    if "" == decrypted {
         return nil, errors.New("cookie解密失败")
     }
     appCookie, ok := gokits.UnJson(decrypted,
@@ -163,27 +164,27 @@ func authAppUser(handlerFunc http.HandlerFunc) http.HandlerFunc {
                 gokits.Json(map[string]string{"msg": "请求数据异常"}))
             return
         }
-        if 0 == len(loginReq.CookieName) {
+        if "" == loginReq.CookieName {
             gokits.ResponseJson(writer,
                 gokits.Json(map[string]string{"msg": "CookieName不能为空"}))
             return
         }
-        if 0 == len(loginReq.Username) {
+        if "" == loginReq.Username {
             gokits.ResponseJson(writer,
                 gokits.Json(map[string]string{"msg": "用户名不能为空"}))
             return
         }
-        if 0 == len(loginReq.Password) {
+        if "" == loginReq.Password {
             gokits.ResponseJson(writer,
                 gokits.Json(map[string]string{"msg": "密码不能为空"}))
             return
         }
-        if 0 == len(loginReq.CaptchaKey) {
+        if "" == loginReq.CaptchaKey {
             gokits.ResponseJson(writer,
                 gokits.Json(map[string]string{"msg": "验证密钥不能为空"}))
             return
         }
-        if 0 == len(loginReq.Captcha) {
+        if "" == loginReq.Captcha {
             gokits.ResponseJson(writer,
                 gokits.Json(map[string]string{"msg": "验证码不能为空"}))
             return
@@ -196,7 +197,7 @@ func authAppUser(handlerFunc http.HandlerFunc) http.HandlerFunc {
             return
         }
         cacheKey, ok := cacheKeyData.Data().(string)
-        if !ok || 0 == len(cacheKey) {
+        if !ok || "" == cacheKey {
             gokits.ResponseJson(writer,
                 gokits.Json(map[string]string{"msg": "验证码不存在或已过期", "refresh": "1"}))
             return
@@ -221,7 +222,7 @@ func authAppUser(handlerFunc http.HandlerFunc) http.HandlerFunc {
         err = db.View(func(tx *bbolt.Tx) error {
             appBuc := tx.Bucket([]byte(AppBucket))
             appValue := string(appBuc.Get([]byte(appCookie.AppId)))
-            if 0 == len(appValue) {
+            if "" == appValue {
                 return errors.New("应用不存在")
             }
             _appInfo, ok := gokits.UnJson(appValue,
@@ -233,7 +234,7 @@ func authAppUser(handlerFunc http.HandlerFunc) http.HandlerFunc {
 
             userBuc := tx.Bucket([]byte(UserBucket))
             userInfoStr := string(userBuc.Get([]byte(loginReq.Username)))
-            if 0 == len(userInfoStr) {
+            if "" == userInfoStr {
                 return errors.New("用户不存在")
             }
             userInfo, ok := gokits.UnJson(userInfoStr,
@@ -281,7 +282,7 @@ func readAppUserCookie(request *http.Request,
         return nil, err
     }
     decrypted := gokits.AESDecrypt(cookie.Value, encryptKey)
-    if 0 == len(decrypted) {
+    if "" == decrypted {
         return nil, errors.New("cookie解密失败")
     }
     appUserCookie, ok := gokits.UnJson(decrypted,
@@ -303,13 +304,13 @@ func serveAppUserDoLogin(writer http.ResponseWriter, request *http.Request) {
         return
     }
     redirectUrl, ok := request.Context().Value(RedirectUrlAttrKey).(string)
-    if !ok || 0 == len(redirectUrl) {
+    if !ok || "" == redirectUrl {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "请求数据异常"}))
         return
     }
     appUsername, ok := request.Context().Value(AppUsernameAttrKey).(string)
-    if !ok || 0 == len(appUsername) {
+    if !ok || "" == appUsername {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "请求数据异常"}))
         return
@@ -348,15 +349,25 @@ func serveAppUserDoLogin(writer http.ResponseWriter, request *http.Request) {
         ExpiredTime: time.Now().Add(time.Hour * time.Duration(appConfig.CookieExpiredHours)),
     }
     cookieValue := gokits.AESEncrypt(gokits.Json(appUserCookie), appInfo.EncryptKey)
-    cookie := http.Cookie{Name: appInfo.CookieName,
-        Value: cookieValue, Path: "/", Expires: appUserCookie.ExpiredTime}
-    if 0 != len(appInfo.CookieDomain) {
-        cookie.Domain = appInfo.CookieDomain
-    }
-    http.SetCookie(writer, &cookie)
+    if "" == appInfo.CocsUrl {
+        // 非跨域跳转 直接设置cookie并返回跳转地址
+        cookie := http.Cookie{Name: appInfo.CookieName,
+            Value: cookieValue, Path: "/", Expires: appUserCookie.ExpiredTime}
+        if "" != appInfo.CookieDomain {
+            cookie.Domain = appInfo.CookieDomain
+        }
+        http.SetCookie(writer, &cookie)
 
-    gokits.ResponseJson(writer,
-        gokits.Json(map[string]string{"msg": "OK", "redirect": redirectUrl}))
+        gokits.ResponseJson(writer,
+            gokits.Json(map[string]string{"msg": "OK", "redirect": redirectUrl}))
+    } else {
+        // 跨域跳转 将cookie作为参数传递给跨域回调 由跨域方设置cookie
+        redirect := appInfo.CocsUrl + "?redirect=" + url.QueryEscape(redirectUrl) +
+            "&e=" + gokits.StrFromInt64(appUserCookie.ExpiredTime.Unix()) +
+            "&" + appInfo.CookieName + "=" + url.QueryEscape(cookieValue)
+        gokits.ResponseJson(writer,
+            gokits.Json(map[string]string{"msg": "OK", "redirect": redirect}))
+    }
 }
 
 // app do register ajax
@@ -378,12 +389,12 @@ func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
             gokits.Json(map[string]string{"msg": "请求数据异常"}))
         return
     }
-    if 0 == len(registerReq.Username) {
+    if "" == registerReq.Username {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "用户名不能为空"}))
         return
     }
-    if 0 == len(registerReq.Password) {
+    if "" == registerReq.Password {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "密码不能为空"}))
         return
@@ -396,7 +407,7 @@ func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
             gokits.Json(map[string]string{"msg": "密码必须为10-20位, 必须包含字母数字和特殊字符"}))
         return
     }
-    if 0 == len(registerReq.RePassword) {
+    if "" == registerReq.RePassword {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "确认密码不能为空"}))
         return
@@ -406,12 +417,12 @@ func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
             gokits.Json(map[string]string{"msg": "两次输入的密码不相同"}))
         return
     }
-    if 0 == len(registerReq.CaptchaKey) {
+    if "" == registerReq.CaptchaKey {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证密钥不能为空"}))
         return
     }
-    if 0 == len(registerReq.Captcha) {
+    if "" == registerReq.Captcha {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证码不能为空"}))
         return
@@ -424,7 +435,7 @@ func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
         return
     }
     cacheKey, ok := cacheKeyData.Data().(string)
-    if !ok || 0 == len(cacheKey) {
+    if !ok || "" == cacheKey {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证码不存在或已过期", "refresh": "1"}))
         return
@@ -441,7 +452,7 @@ func serveAppUserDoRegister(writer http.ResponseWriter, request *http.Request) {
     err := db.Update(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(UserBucket))
         exists := string(bucket.Get([]byte(registerReq.Username)))
-        if 0 != len(exists) {
+        if "" != exists {
             return errors.New("用户名已存在")
         }
         newUser := UserInfo{
@@ -485,17 +496,17 @@ func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Requ
             gokits.Json(map[string]string{"msg": "请求数据异常"}))
         return
     }
-    if 0 == len(changeReq.Username) {
+    if "" == changeReq.Username {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "用户名不能为空"}))
         return
     }
-    if 0 == len(changeReq.OldPassword) {
+    if "" == changeReq.OldPassword {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "原密码不能为空"}))
         return
     }
-    if 0 == len(changeReq.NewPassword) {
+    if "" == changeReq.NewPassword {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "新密码不能为空"}))
         return
@@ -508,7 +519,7 @@ func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Requ
             gokits.Json(map[string]string{"msg": "新密码必须为10-20位, 必须包含字母数字和特殊字符"}))
         return
     }
-    if 0 == len(changeReq.RenewPassword) {
+    if "" == changeReq.RenewPassword {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "确认密码不能为空"}))
         return
@@ -518,12 +529,12 @@ func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Requ
             gokits.Json(map[string]string{"msg": "两次输入的新密码不相同"}))
         return
     }
-    if 0 == len(changeReq.CaptchaKey) {
+    if "" == changeReq.CaptchaKey {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证密钥不能为空"}))
         return
     }
-    if 0 == len(changeReq.Captcha) {
+    if "" == changeReq.Captcha {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证码不能为空"}))
         return
@@ -536,7 +547,7 @@ func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Requ
         return
     }
     cacheKey, ok := cacheKeyData.Data().(string)
-    if !ok || 0 == len(cacheKey) {
+    if !ok || "" == cacheKey {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "验证码不存在或已过期", "refresh": "1"}))
         return
@@ -553,7 +564,7 @@ func serveAppUserDoChangePassword(writer http.ResponseWriter, request *http.Requ
     err := db.Update(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(UserBucket))
         userInfoStr := string(bucket.Get([]byte(changeReq.Username)))
-        if 0 == len(userInfoStr) {
+        if "" == userInfoStr {
             return errors.New("用户不存在")
         }
         userInfo, ok := gokits.UnJson(userInfoStr,

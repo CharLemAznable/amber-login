@@ -95,7 +95,7 @@ func serveAdminSetUserPrivileges(writer http.ResponseWriter, request *http.Reque
             gokits.Json(map[string]string{"msg": "请求数据异常"}))
         return
     }
-    if 0 == len(submitReq.Username) {
+    if "" == submitReq.Username {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "用户名不能为空"}))
         return
@@ -104,7 +104,7 @@ func serveAdminSetUserPrivileges(writer http.ResponseWriter, request *http.Reque
     err := db.Update(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(UserBucket))
         userInfoStr := string(bucket.Get([]byte(submitReq.Username)))
-        if 0 == len(userInfoStr) {
+        if "" == userInfoStr {
             return errors.New("用户不存在")
         }
         userInfo, ok := gokits.UnJson(userInfoStr,
@@ -135,12 +135,12 @@ func serveAdminResetUserPassword(writer http.ResponseWriter, request *http.Reque
             gokits.Json(map[string]string{"msg": "请求数据异常"}))
         return
     }
-    if 0 == len(submitReq.Username) {
+    if "" == submitReq.Username {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "用户名不能为空"}))
         return
     }
-    if 0 == len(submitReq.Password) {
+    if "" == submitReq.Password {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "新密码不能为空"}))
         return
@@ -157,7 +157,7 @@ func serveAdminResetUserPassword(writer http.ResponseWriter, request *http.Reque
     err := db.Update(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(UserBucket))
         userInfoStr := string(bucket.Get([]byte(submitReq.Username)))
-        if 0 == len(userInfoStr) {
+        if "" == userInfoStr {
             return errors.New("用户不存在")
         }
         userInfo, ok := gokits.UnJson(userInfoStr,
@@ -189,7 +189,7 @@ func serveAdminSwitchToggleUser(writer http.ResponseWriter, request *http.Reques
             gokits.Json(map[string]string{"msg": "请求数据异常"}))
         return
     }
-    if 0 == len(submitReq.Username) {
+    if "" == submitReq.Username {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "用户名不能为空"}))
         return
@@ -198,7 +198,7 @@ func serveAdminSwitchToggleUser(writer http.ResponseWriter, request *http.Reques
     err := db.Update(func(tx *bbolt.Tx) error {
         bucket := tx.Bucket([]byte(UserBucket))
         userInfoStr := string(bucket.Get([]byte(submitReq.Username)))
-        if 0 == len(userInfoStr) {
+        if "" == userInfoStr {
             return errors.New("用户不存在")
         }
         userInfo, ok := gokits.UnJson(userInfoStr,
@@ -230,7 +230,7 @@ func serveAdminDeleteUser(writer http.ResponseWriter, request *http.Request) {
             gokits.Json(map[string]string{"msg": "请求数据异常"}))
         return
     }
-    if 0 == len(submitReq.Username) {
+    if "" == submitReq.Username {
         gokits.ResponseJson(writer,
             gokits.Json(map[string]string{"msg": "用户名不能为空"}))
         return
@@ -279,7 +279,7 @@ func readAdminSocketCookie(ws *websocket.Conn) (*AdminCookie, error) {
         }
     }
     decrypted := gokits.AESDecrypt(cookieValue, AESCipherKey)
-    if 0 == len(decrypted) {
+    if "" == decrypted {
         return nil, errors.New("注册信息解密失败")
     }
     adminCookie, ok := gokits.UnJson(decrypted,
