@@ -56,8 +56,8 @@ func authAdmin(handlerFunc http.HandlerFunc) http.HandlerFunc {
             Redirect:    request.RequestURI, // include contextPath prefix
         }
         cookieValue := gokits.AESEncrypt(gokits.Json(tempCookie), AESCipherKey)
-        cookie := http.Cookie{Name: AdminCookieName,
-            Value: cookieValue, Path: "/", Expires: tempCookie.ExpiredTime}
+        cookie := http.Cookie{Name: AdminCookieName, Value: cookieValue,
+            Path: "/", Expires: tempCookie.ExpiredTime, HttpOnly: true}
         http.SetCookie(writer, &cookie)
 
         if gokits.IsAjaxRequest(request) {
@@ -154,8 +154,8 @@ func serveAdminDoLogin(writer http.ResponseWriter, request *http.Request) {
         ExpiredTime: time.Now().Add(time.Hour),
     }
     cookieValue := gokits.AESEncrypt(gokits.Json(adminCookie), AESCipherKey)
-    cookie := http.Cookie{Name: AdminCookieName,
-        Value: cookieValue, Path: "/", Expires: adminCookie.ExpiredTime}
+    cookie := http.Cookie{Name: AdminCookieName, Value: cookieValue,
+        Path: "/", Expires: adminCookie.ExpiredTime, HttpOnly: true}
     http.SetCookie(writer, &cookie)
 
     gokits.ResponseJson(writer,
@@ -230,8 +230,8 @@ func serveAdminDoLogout(writer http.ResponseWriter, _ *http.Request) {
         Redirect:    gokits.PathJoin(appConfig.ContextPath, "/admin/index"),
     }
     cookieValue := gokits.AESEncrypt(gokits.Json(tempCookie), AESCipherKey)
-    cookie := http.Cookie{Name: AdminCookieName,
-        Value: cookieValue, Path: "/", Expires: tempCookie.ExpiredTime}
+    cookie := http.Cookie{Name: AdminCookieName, Value: cookieValue,
+        Path: "/", Expires: tempCookie.ExpiredTime, HttpOnly: true}
     http.SetCookie(writer, &cookie)
     gokits.ResponseJson(writer, gokits.Json(map[string]string{}))
 }

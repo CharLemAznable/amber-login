@@ -98,8 +98,8 @@ func serveAppCookie(handlerFunc http.HandlerFunc) http.HandlerFunc {
             ExpiredTime: time.Now().Add(time.Minute * 5), // expired 5 minutes
         }
         cookieValue := gokits.AESEncrypt(gokits.Json(appCookie), AESCipherKey)
-        cookie := http.Cookie{Name: appCookieName,
-            Value: cookieValue, Path: "/", Expires: appCookie.ExpiredTime}
+        cookie := http.Cookie{Name: appCookieName, Value: cookieValue,
+            Path: "/", Expires: appCookie.ExpiredTime, HttpOnly: true}
         http.SetCookie(writer, &cookie)
 
         handlerFunc(writer, request.WithContext(modelCtx))
@@ -351,8 +351,8 @@ func serveAppUserDoLogin(writer http.ResponseWriter, request *http.Request) {
     cookieValue := gokits.AESEncrypt(gokits.Json(appUserCookie), appInfo.EncryptKey)
     if "" == appInfo.CocsUrl {
         // 非跨域跳转 直接设置cookie并返回跳转地址
-        cookie := http.Cookie{Name: appInfo.CookieName,
-            Value: cookieValue, Path: "/", Expires: appUserCookie.ExpiredTime}
+        cookie := http.Cookie{Name: appInfo.CookieName, Value: cookieValue,
+            Path: "/", Expires: appUserCookie.ExpiredTime, HttpOnly: true}
         if "" != appInfo.CookieDomain {
             cookie.Domain = appInfo.CookieDomain
         }
