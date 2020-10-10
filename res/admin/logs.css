@@ -10,3 +10,17 @@
 .logs-container.admin-main .layui-table-view .layui-table {
     width: 100%;
 }
+
+.limit-form {
+    text-align: right;
+}
+
+.limit-input {
+    padding: 0 3px;
+    width: 50px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    display: inline-block;
+    vertical-align: middle;
+}

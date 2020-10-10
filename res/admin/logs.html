@@ -36,6 +36,16 @@
     <table id="logs" lay-filter="logs"></table>
 </div>
 
+<div class="layui-container layui-form layui-form-pane">
+    <div class="layui-form-item limit-form">
+        <button class="layui-btn layui-btn-sm" lay-submit lay-filter="clean">清除</button>
+        <label>最早的</label>
+        <input name="limit" type="text" lay-verify="required" lay-verType="tips"
+               value="100" autocomplete="off" class="layui-input limit-input">
+        <label>条日志</label>
+    </div>
+</div>
+
 <div class="admin-footer">
     <div class="layui-container">
         <p>Raiyee Amber © 2019</p>

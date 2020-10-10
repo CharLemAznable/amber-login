@@ -73,4 +73,22 @@ layui.use(['jquery', 'layer', 'form'], function () {
         });
         return false;
     });
+
+    $('.captcha-block').on('click', function () {
+        let load = layer.load(1, {shade: 0.6});
+        $.ajax({
+            url: '${contextPath}/refresh-captcha',
+            contentType: 'application/json',
+            success: function (res) {
+                $('#captcha-id').val(res['captcha-id']);
+                $('#captcha').attr("src", res['captcha']);
+            },
+            error: function () {
+                layer.alert('服务异常');
+            },
+            complete: function () {
+                layer.close(load);
+            },
+        });
+    });
 });

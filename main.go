@@ -15,6 +15,10 @@ func main() {
     HandleFunc(mux, "/res/",
         serveResources("/res/"), DumpRequestDisabled)
 
+    // common
+    HandleFunc(mux, "/refresh-captcha",
+        ServeAjax(generateCaptcha), DumpRequestDisabled)
+
     // admin login
     HandleFunc(mux, "/admin/login",
         serveCaptcha(serveHtmlPage("admin/login")))
@@ -70,6 +74,8 @@ func main() {
         authAdmin(serveHtmlPage("admin/logs")))
     HandleFunc(mux, "/admin/query-logs",
         ServeAjax(authAdmin(serveAdminQueryUserLoginLogs)))
+    HandleFunc(mux, "/admin/clean-logs",
+        ServePost(ServeAjax(authAdmin(serveAdminCleanUserLoginLogs))))
 
     // user login/register/change-password
     HandleFunc(mux, "/",

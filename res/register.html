@@ -36,10 +36,10 @@
     <div class="layui-form-item">
         <label class="layui-form-label">验证码</label>
         <div class="layui-input-block captcha-input-block">
-            <input name="captcha-key" type="hidden" value="${captcha-id}">
+            <input id="captcha-id" name="captcha-key" type="hidden" value="${captcha-id}">
             <input name="captcha" type="text" lay-verify="required" lay-verType="tips"
                    placeholder="请输入验证码" autocomplete="off" class="layui-input captcha-input">
-            <div class="captcha-block"><img alt="" src="${captcha}"></div>
+            <div class="captcha-block"><img id="captcha" alt="" src="${captcha}"></div>
         </div>
     </div>
     <div class="layui-form-item">

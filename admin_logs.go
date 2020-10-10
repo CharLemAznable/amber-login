@@ -62,3 +62,43 @@ func pagingForLoopIncrease(cursor *bbolt.Cursor, i int) ([]byte, []byte, int) {
     k, v := cursor.Prev()
     return k, v, i + 1
 }
+
+type AdminCleanLogsReq struct {
+    Limit string `json:"limit"`
+}
+
+func serveAdminCleanUserLoginLogs(writer http.ResponseWriter, request *http.Request) {
+    body, _ := gokits.RequestBody(request)
+    cleanReq, ok := gokits.UnJson(body,
+        new(AdminCleanLogsReq)).(*AdminCleanLogsReq)
+    if !ok || nil == cleanReq {
+        gokits.ResponseJson(writer,
+            gokits.Json(map[string]string{"msg": "请求数据异常"}))
+        return
+    }
+    limit, err := gokits.IntFromStr(cleanReq.Limit)
+    if nil != err {
+        limit = 100
+    }
+
+    err = db.Update(func(tx *bbolt.Tx) error {
+        bucket := tx.Bucket([]byte(LogBucket))
+        cursor := bucket.Cursor()
+        k, _ := cursor.First()
+        for i := 0; k != nil && i < limit; i++ {
+            _ = bucket.Delete(k)
+            k, _ = cursor.Next()
+        }
+        return nil
+    })
+
+    if err != nil {
+        gokits.ResponseJson(writer,
+            gokits.Json(map[string]interface{}{
+                "code": -1, "msg": err.Error()}))
+        return
+    }
+    gokits.ResponseJson(writer,
+        gokits.Json(map[string]interface{}{
+            "code": 0, "msg": "OK"}))
+}

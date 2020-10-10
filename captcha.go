@@ -36,3 +36,11 @@ func serveCaptcha(handlerFunc http.HandlerFunc) http.HandlerFunc {
         handlerFunc(writer, request.WithContext(modelCtx))
     }
 }
+
+func generateCaptcha(writer http.ResponseWriter, _ *http.Request) {
+    idKey, captchaInBase64, _ := captchaInstance.Generate()
+    captchaCache.Add(idKey, time.Minute*5, idKey) // cache 5 minutes
+
+    gokits.ResponseJson(writer,
+        gokits.Json(map[string]string{"captcha-id": idKey, "captcha": captchaInBase64}))
+}

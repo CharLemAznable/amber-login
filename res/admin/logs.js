@@ -1,4 +1,7 @@
-layui.use(['jquery', 'layer', 'table'], function () {
+layui.use(['jquery', 'layer', 'form', 'table'], function () {
+    let $ = layui.$;
+    let layer = layui.layer;
+    let form = layui.form;
     let table = layui.table;
 
     let tpl = function (d) {
@@ -23,4 +26,31 @@ layui.use(['jquery', 'layer', 'table'], function () {
         });
     };
     loadLogs();
+
+    form.on('submit(clean)', function (data) {
+        let load = layer.load(1, {shade: 0.6});
+        $.ajax({
+            type: 'POST',
+            url: '${contextPath}/admin/clean-logs',
+            contentType: 'application/json',
+            data: JSON.stringify(data.field),
+            dataType: 'json',
+            success: function (res) {
+                if ('OK' !== res.msg) {
+                    layer.alert(res.msg, function () {
+                        location.replace(location.href);
+                    });
+                    return;
+                }
+                location.replace(location.href);
+            },
+            error: function () {
+                layer.alert('服务异常');
+            },
+            complete: function () {
+                layer.close(load);
+            },
+        });
+        return false;
+    });
 });
