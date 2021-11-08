@@ -5,7 +5,6 @@ import (
     "github.com/BurntSushi/toml"
     "github.com/CharLemAznable/gokits"
     "strings"
-    "unsafe"
 )
 
 type AppConfig struct {
@@ -41,6 +40,6 @@ func init() {
         appConfig.CookieExpiredHours = 6
     })
 
-    gokits.GlobalHttpServerConfig = (*gokits.HttpServerConfig)(unsafe.Pointer(&appConfig))
+    gokits.GlobalHttpServerConfig = &appConfig.HttpServerConfig
     gokits.LOG.Debug("appConfig: %s", gokits.Json(appConfig))
 }
