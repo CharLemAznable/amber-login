@@ -2,6 +2,7 @@ package main
 
 import (
     "bytes"
+    "encoding/json"
     "github.com/CharLemAznable/gokits"
     "github.com/averagesecurityguy/random"
     "io"
@@ -18,6 +19,9 @@ func randomCookieField() string {
 }
 
 type JsonableTime time.Time
+
+var _ json.Marshaler = JsonableTime(time.Now())
+var _ json.Unmarshaler = (*JsonableTime)(nil)
 
 const JsonableTimeFormat = "2006-01-02 15:04:05"
 

@@ -5,6 +5,7 @@ import (
     "github.com/BurntSushi/toml"
     "github.com/CharLemAznable/gokits"
     "strings"
+    "testing"
 )
 
 type AppConfig struct {
@@ -20,6 +21,7 @@ var _configFile string
 func init() {
     gokits.LOG.LoadConfiguration("logback.xml")
 
+    testing.Init()
     flag.StringVar(&_configFile, "configFile", "appConfig.toml", "config file path")
     flag.Parse()
 
