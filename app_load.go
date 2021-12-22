@@ -4,6 +4,7 @@ import (
     "flag"
     "github.com/BurntSushi/toml"
     "github.com/CharLemAznable/gokits"
+    "github.com/kataras/golog"
     "strings"
     "testing"
 )
@@ -19,14 +20,12 @@ var appConfig AppConfig
 var _configFile string
 
 func init() {
-    gokits.LOG.LoadConfiguration("logback.xml")
-
     testing.Init()
     flag.StringVar(&_configFile, "configFile", "appConfig.toml", "config file path")
     flag.Parse()
 
     if _, err := toml.DecodeFile(_configFile, &appConfig); err != nil {
-        gokits.LOG.Crashf("config file decode error: %s", err.Error())
+        golog.Fatalf("config file decode error: %s", err.Error())
     }
 
     gokits.If(0 == appConfig.Port, func() {
@@ -43,5 +42,5 @@ func init() {
     })
 
     gokits.GlobalHttpServerConfig = &appConfig.HttpServerConfig
-    gokits.LOG.Debug("appConfig: %s", gokits.Json(appConfig))
+    golog.Debugf("appConfig: %s", gokits.Json(appConfig))
 }

@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "github.com/CharLemAznable/gokits"
+    "github.com/kataras/golog"
     "go.etcd.io/bbolt"
     "os"
 )
@@ -17,7 +18,7 @@ const LogBucket = "log"
 func init() {
     _db, err := bbolt.Open("./amber.db", 0666, nil)
     if err != nil {
-        gokits.LOG.Crashf("DB create error: %s", err.Error())
+        golog.Fatalf("DB create error: %s", err.Error())
     }
     db = _db
 
@@ -91,6 +92,6 @@ func init() {
         return nil
     })
     if err != nil {
-        gokits.LOG.Crashf("DB init error: %s", err.Error())
+        golog.Fatalf("DB init error: %s", err.Error())
     }
 }

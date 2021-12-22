@@ -2,6 +2,7 @@ package main
 
 import (
     . "github.com/CharLemAznable/gokits"
+    "github.com/kataras/golog"
     "golang.org/x/net/websocket"
     "net/http"
 )
@@ -96,6 +97,6 @@ func main() {
 
     server := http.Server{Addr: ":" + StrFromInt(appConfig.Port), Handler: mux}
     if err := server.ListenAndServe(); err != nil {
-        LOG.Crashf("Start server Error: %s", err.Error())
+        golog.Fatalf("Start server Error: %s", err.Error())
     }
 }

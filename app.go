@@ -3,6 +3,7 @@ package main
 import (
     "errors"
     "github.com/CharLemAznable/gokits"
+    "github.com/kataras/golog"
     "go.etcd.io/bbolt"
     "net/http"
     "net/url"
@@ -331,7 +332,7 @@ func serveAppUserDoLogin(writer http.ResponseWriter, request *http.Request) {
                 []byte(gokits.Json(log)))
         })
         if err != nil {
-            _ = gokits.LOG.Error("User Login logger Error: %s", err.Error())
+            golog.Errorf("User Login logger Error: %s", err.Error())
         }
     }()
 

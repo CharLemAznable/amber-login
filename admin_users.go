@@ -3,6 +3,7 @@ package main
 import (
     "errors"
     "github.com/CharLemAznable/gokits"
+    "github.com/kataras/golog"
     "go.etcd.io/bbolt"
     "golang.org/x/net/websocket"
     "net/http"
@@ -253,13 +254,13 @@ func serveAdminDeleteUser(writer http.ResponseWriter, request *http.Request) {
 func serveAdminUsersSocket(ws *websocket.Conn) {
     _, err := readAdminSocketCookie(ws)
     if nil != err {
-        _ = gokits.LOG.Error("WebSocket register Error: %s", err.Error())
+        golog.Errorf("WebSocket register Error: %s", err.Error())
         return
     }
 
     for {
         if err := adminSocketUsersSend(ws); err != nil {
-            _ = gokits.LOG.Error("WebSocket send message Error: %s", err.Error())
+            golog.Errorf("WebSocket send message Error: %s", err.Error())
             break
         }
     }
