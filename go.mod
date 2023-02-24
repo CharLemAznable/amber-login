@@ -11,5 +11,5 @@ require (
 	github.com/mojocn/base64Captcha v1.3.4
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1 // indirect
-	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa
+	golang.org/x/net v0.7.0
 )
